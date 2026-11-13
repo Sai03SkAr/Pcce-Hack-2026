@@ -1,0 +1,68 @@
+﻿Ledger,Group,Debit,Credit
+Capital - Suresh Naik,Capital Account,,9830396
+Drawings - Suresh Naik,Capital Account,120000,
+Asian Paints Distributor - Panaji,Sundry Creditors,,244195
+Finolex Electricals Goa,Sundry Creditors,,161967
+Goa Cement Agencies,Sundry Creditors,,1109783
+Hubli Hardware Mart,Sundry Creditors,,85978
+Kajaria Tiles Distributor,Sundry Creditors,,323330
+Konkan Steel Traders,Sundry Creditors,,728483
+Sanguem Sand & Metal Suppliers,Sundry Creditors,,476104
+Supreme Pipes Depot,Sundry Creditors,,249286
+Input CGST,Duties & Taxes,1762747,
+Input IGST,Duties & Taxes,65453,
+Input SGST,Duties & Taxes,1762826,
+Output CGST,Duties & Taxes,,2529864
+Output IGST,Duties & Taxes,,121124
+Output SGST,Duties & Taxes,,2533282
+Anjuna Resorts,Sundry Debtors,50874,
+Bardez Constructions,Sundry Debtors,25944,
+Bhat Interiors,Sundry Debtors,11516,
+Borkar Developers,Sundry Debtors,93100,
+Calangute Villas Pvt Ltd,Sundry Debtors,94117,
+Colaco Civil Works,Sundry Debtors,1073,
+D'Souza Builders,Sundry Debtors,113815,
+Dhavalikar Constructions,Sundry Debtors,80348,
+Farmagudi Housing,Sundry Debtors,38961,
+Fernandes & Sons,Sundry Debtors,16705,
+Gauns Engineering,Sundry Debtors,19434,
+Kamat Infra,Sundry Debtors,105145,
+Khandeparkar Plumbing,Sundry Debtors,8177,
+Khorjuvekar Electricals,Sundry Debtors,3235,
+Lobo Contractors,Sundry Debtors,50450,
+Mandrekar Builders,Sundry Debtors,89362,
+Marcel Farms,Sundry Debtors,12924,
+Mascarenhas Builders,Sundry Debtors,14614,
+Naik Painting Works,Sundry Debtors,11226,
+Pinto Civil,Sundry Debtors,52899,
+Prabhu Interiors,Sundry Debtors,91507,
+Ramesh Gaonkar Contractor,Sundry Debtors,55764,
+Sai Electricals,Sundry Debtors,10144,
+Salcete Housing Society,Sundry Debtors,23965,
+Sawant Municipal Contractor,Sundry Debtors,32700,
+Shantadurga Builders,Sundry Debtors,121810,
+Shirodkar Tiles & Flooring,Sundry Debtors,10537,
+Shree Datta Constructions,Sundry Debtors,20691,
+Usgaonkar Fabricators,Sundry Debtors,16284,
+Verlekar Plumbing,Sundry Debtors,107745,
+Opening Stock,Stock-in-Hand,9385396,
+Cash - Mapusa,Cash-in-Hand,163241,
+Cash - Margao,Cash-in-Hand,242226,
+Cash - Ponda,Cash-in-Hand,148968,
+HDFC Bank - Current,Bank Accounts,8251979,
+SBI - Current,Bank Accounts,2294938,
+Sales @12%,Sales Accounts,,720000
+Sales @18%,Sales Accounts,,15001635
+Sales @28%,Sales Accounts,,8312738
+Sales @5%,Sales Accounts,,1406909
+Purchase @12%,Purchase Accounts,475714,
+Purchase @18%,Purchase Accounts,9985113,
+Purchase @28%,Purchase Accounts,6031800,
+Purchase @5%,Purchase Accounts,922093,
+Bank Charges,Indirect Expenses,2124,
+Electricity,Indirect Expenses,55890,
+Rent,Indirect Expenses,300000,
+Salaries & Wages,Indirect Expenses,393000,
+Telephone & Internet,Indirect Expenses,9000,
+Transport & Hamali,Indirect Expenses,77500,
+Total,,43835074,43835074

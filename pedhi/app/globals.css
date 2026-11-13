@@ -1,0 +1,146 @@
+@import "tailwindcss";
+
+/* Pedhi: the red cloth-bound bahi-khata, gold thread, cream ledger paper. */
+:root {
+  /* Neutral ledger paper (not beige), one brand accent: bahi-khata red. Gold is a highlight only. */
+  --paper: #f3f3f0;
+  --paper-2: #e9e9e4;
+  --card: #fcfcfa;
+  --ink: #1d1d1b;
+  --ink-2: #45453f;
+  --muted: #727169;
+  --line: #e1e0da;
+  --line-2: #cfcec6;
+  --bahi: #b02a20;
+  --bahi-2: #8c2019;
+  --bahi-soft: #f7e4e1;
+  --gold: #946a12;
+  --gold-soft: #f3ead6;
+  --leaf: #2e6a3d;
+  --leaf-soft: #e2efe2;
+  --amber: #a85a06;
+  --amber-soft: #fbebd6;
+  --wa: #0b5c4c;
+  --wa-bubble: #d9fdd3;
+  --wa-bg: #ece8e1;
+  --shadow: 0 1px 0 rgb(29 29 27 / 0.03), 0 1px 2px rgb(29 29 27 / 0.06);
+  --shadow-lg: 0 12px 32px -14px rgb(29 29 27 / 0.28);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #131312;
+    --paper-2: #1b1b19;
+    --card: #1e1e1c;
+    --ink: #efeee9;
+    --ink-2: #cfcec7;
+    --muted: #96958c;
+    --line: #2c2c29;
+    --line-2: #3a3a36;
+    --bahi: #e76a5f;
+    --bahi-2: #f08b82;
+    --bahi-soft: #3a1c19;
+    --gold: #d7a94a;
+    --gold-soft: #2f2817;
+    --leaf: #6fbf84;
+    --leaf-soft: #1c2c20;
+    --amber: #e59a46;
+    --amber-soft: #33261a;
+    --wa: #6ad3b7;
+    --wa-bubble: #144d40;
+    --wa-bg: #0f1a17;
+    --shadow: 0 1px 0 rgb(0 0 0 / 0.3);
+    --shadow-lg: 0 10px 30px -12px rgb(0 0 0 / 0.6);
+    color-scheme: dark;
+  }
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-paper-2: var(--paper-2);
+  --color-card: var(--card);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-line-2: var(--line-2);
+  --color-bahi: var(--bahi);
+  --color-bahi-2: var(--bahi-2);
+  --color-bahi-soft: var(--bahi-soft);
+  --color-gold: var(--gold);
+  --color-gold-soft: var(--gold-soft);
+  --color-leaf: var(--leaf);
+  --color-leaf-soft: var(--leaf-soft);
+  --color-amber: var(--amber);
+  --color-amber-soft: var(--amber-soft);
+  --color-wa: var(--wa);
+  --color-wa-bubble: var(--wa-bubble);
+  --color-wa-bg: var(--wa-bg);
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI Variable", "Segoe UI", Roboto, "Noto Sans Devanagari", "Kohinoor Devanagari", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --font-display: var(--font-sans);
+}
+
+html, body { background: var(--paper); color: var(--ink); }
+/* Grid items default to min-width:auto, so one wide table could stretch the whole page past the phone screen. */
+.grid > * { min-width: 0; }
+html { -webkit-tap-highlight-color: transparent; }
+body { font-family: var(--font-sans); }
+::selection { background: var(--gold-soft); }
+
+@layer components {
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); }
+  .num { font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+  .display { font-family: var(--font-display); letter-spacing: -0.028em; }
+  .eyebrow { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    height: 36px; padding: 0 14px; border-radius: 9px; font-size: 14px; font-weight: 550;
+    border: 1px solid var(--line-2); background: var(--card); color: var(--ink);
+    transition: background 120ms, border-color 120ms, transform 80ms; white-space: nowrap; cursor: pointer;
+  }
+  .btn:hover { background: var(--paper-2); }
+  .btn:active { transform: translateY(1px); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn:focus-visible, .input:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  .btn-primary { background: var(--bahi); border-color: var(--bahi); color: #fff8f2; }
+  .btn-primary:hover { background: var(--bahi-2); border-color: var(--bahi-2); }
+  .btn-ghost { border-color: transparent; background: transparent; }
+  .btn-ghost:hover { background: var(--paper-2); }
+  .btn-sm { height: 30px; padding: 0 10px; font-size: 13px; border-radius: 8px; }
+  .btn-lg { height: 46px; padding: 0 20px; font-size: 15px; border-radius: 11px; }
+
+  .input {
+    height: 38px; width: 100%; padding: 0 12px; border-radius: 9px; font-size: 14px;
+    background: var(--card); color: var(--ink); border: 1px solid var(--line-2);
+  }
+  .input::placeholder { color: var(--muted); }
+  textarea.input { height: auto; padding: 10px 12px; line-height: 1.5; }
+
+  .chip { display: inline-flex; align-items: center; gap: 4px; height: 22px; padding: 0 8px; border-radius: 99px; font-size: 12px; font-weight: 550; white-space: nowrap; }
+  .chip-red { background: var(--bahi-soft); color: var(--bahi); }
+  .chip-amber { background: var(--amber-soft); color: var(--amber); }
+  .chip-green { background: var(--leaf-soft); color: var(--leaf); }
+  .chip-gold { background: var(--gold-soft); color: var(--gold); }
+  .chip-grey { background: var(--paper-2); color: var(--ink-2); }
+
+  .table { width: 100%; font-size: 14px; border-collapse: separate; border-spacing: 0; }
+  .table th { text-align: left; font-size: 11.5px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); padding: 10px 12px; border-bottom: 1px solid var(--line); background: var(--card); position: sticky; top: 0; }
+  .table td { padding: 11px 12px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+  .table tr:last-child td { border-bottom: 0; }
+  .table tbody tr:hover td { background: color-mix(in oklab, var(--paper-2) 55%, transparent); }
+
+  /* Ledger rule lines behind the brief, like a bahi page */
+  .ledger { background-image: repeating-linear-gradient(to bottom, transparent 0 27px, color-mix(in oklab, var(--line) 70%, transparent) 27px 28px); }
+}
+
+/* Slide only, never fade from 0: content stays readable even if the browser throttles animation. */
+@keyframes rise { from { transform: translateY(5px); } to { transform: none; } }
+.rise { animation: rise 320ms cubic-bezier(.2,.7,.2,1) both; }
+@keyframes pulse-dot { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
+.typing span { animation: pulse-dot 1s infinite; }
+.typing span:nth-child(2) { animation-delay: 0.15s; }
+.typing span:nth-child(3) { animation-delay: 0.3s; }
+@media (prefers-reduced-motion: reduce) { .rise, .typing span { animation: none; } }
