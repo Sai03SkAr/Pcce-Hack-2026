@@ -68,7 +68,8 @@ export async function stockStatus(s: Scope): Promise<StockRow[]> {
   const T = today()
   const rows = await q<any>(
     `SELECT i.id item_id, i.name, i.category, i.unit, i.cost, i.price, i.lead_days, st.branch_id, b.name branch,
-       st.qty, st.reorder_level, st.qty*i.cost value, COALESCE(v.q28,0)/28.0 avg_daily, v.last_sold
+       st.qty, st.reorder_level, st.qty*i.cost value, COALESCE(v.q28,0)/28.0 avg_daily, v.last_sold,
+       (SELECT MIN(m.day) FROM stock_moves m WHERE m.item_id=st.item_id AND m.branch_id=st.branch_id) first_in
      FROM stock st JOIN items i ON i.id=st.item_id JOIN branches b ON b.id=st.branch_id
      LEFT JOIN (SELECT si.item_id, x.branch_id, SUM(CASE WHEN x.day >= ? AND x.day < ? THEN si.qty END) q28, MAX(x.day) last_sold
                 FROM sale_items si JOIN sales x ON x.id=si.sale_id WHERE x.org_id=? GROUP BY si.item_id, x.branch_id) v
@@ -79,7 +80,7 @@ export async function stockStatus(s: Scope): Promise<StockRow[]> {
     const since = r.last_sold ? daysBetween(r.last_sold, T) : null
     const status = r.qty <= 0 && r.avg_daily > 0 ? 'out'
       : cover !== null && cover < r.lead_days + 1 ? 'low'
-      : r.qty > 0 && (since === null || since >= 60) ? 'dead' : 'ok'
+      : r.qty > 0 && (since === null ? !r.first_in || daysBetween(r.first_in, T) >= 60 : since >= 60) ? 'dead' : 'ok' // new stock isn't dead stock
     return { ...r, avg_daily: +r.avg_daily.toFixed(2), cover_days: cover, days_since_sold: since, status }
   })
 }

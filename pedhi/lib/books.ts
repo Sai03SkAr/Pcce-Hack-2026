@@ -208,7 +208,7 @@ async function account(u: User, id: number, t?: Exec) {
 }
 const amountOk = (n: number) => { if (!Number.isInteger(n) || n <= 0) throw new OpError('Enter an amount above zero.') }
 
-export type PurchaseIn = { branchId: number; supplierId: number; billNo?: string; mode: 'credit' | 'paid'; accountId?: number; lines: { itemId: number; qty: number; rate: number }[]; day?: string; source?: string }
+export type PurchaseIn = { branchId: number; supplierId: number; billNo?: string; mode: 'credit' | 'paid'; accountId?: number; lines: { itemId: number; qty: number; rate: number; expiry?: string | null }[]; day?: string; source?: string }
 
 /** Bought stock: adds it to the branch, books the purchase with input GST, and owes the supplier (or pays now). */
 export async function recordPurchase(u: User, p: PurchaseIn) {
@@ -216,6 +216,7 @@ export async function recordPurchase(u: User, p: PurchaseIn) {
   if (u.branch_id && u.branch_id !== p.branchId) throw new OpError(`You can only receive stock into ${u.branch}.`)
   if (!p.lines.length || p.lines.some((l) => !Number.isInteger(l.qty) || l.qty <= 0 || !(l.rate > 0))) throw new OpError('Each item needs a quantity and a rate.')
   const day = p.day ?? today()
+  if (p.lines.some((l) => l.expiry && (!/^\d{4}-\d{2}-\d{2}$/.test(l.expiry) || l.expiry <= day))) throw new OpError('An expiry date must be after the day the stock came in.')
   return tx(async (t) => {
     const sup = await one<any>('SELECT s.*, o.state ostate FROM suppliers s JOIN orgs o ON o.id=s.org_id WHERE s.id=? AND s.org_id=?', [p.supplierId, u.org_id], t)
     if (!sup) throw new OpError('Pick a supplier.')
@@ -224,7 +225,7 @@ export async function recordPurchase(u: User, p: PurchaseIn) {
     const total = p.lines.reduce((s, l) => s + Math.round(l.qty * l.rate), 0)
     const pid = await run('INSERT INTO purchases (org_id, branch_id, supplier_id, day, bill_no, total, user_id) VALUES (?,?,?,?,?,?,?)', [u.org_id, p.branchId, sup.id, day, p.billNo ?? null, total, u.id], t)
     for (const l of p.lines) {
-      await run('INSERT INTO purchase_items (purchase_id, item_id, qty, rate) VALUES (?,?,?,?)', [pid, l.itemId, l.qty, l.rate], t)
+      await run('INSERT INTO purchase_items (purchase_id, item_id, qty, rate, expiry) VALUES (?,?,?,?,?)', [pid, l.itemId, l.qty, l.rate, l.expiry || null], t)
       await run('INSERT INTO stock (item_id, branch_id, qty) VALUES (?,?,?) ON CONFLICT (item_id, branch_id) DO UPDATE SET qty = qty + excluded.qty', [l.itemId, p.branchId, l.qty], t)
       await run('INSERT INTO stock_moves (org_id, item_id, branch_id, day, type, qty, ref, user_id) VALUES (?,?,?,?,?,?,?,?)', [u.org_id, l.itemId, p.branchId, day, 'purchase', l.qty, `Bill ${p.billNo ?? pid} · ${sup.name}`, u.id], t)
     }

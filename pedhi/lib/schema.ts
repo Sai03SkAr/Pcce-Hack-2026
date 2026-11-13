@@ -65,7 +65,9 @@ CREATE TABLE IF NOT EXISTS voucher_lines (id INTEGER PRIMARY KEY, voucher_id INT
 CREATE TABLE IF NOT EXISTS purchases (
   id INTEGER PRIMARY KEY, org_id INTEGER NOT NULL, branch_id INTEGER NOT NULL, supplier_id INTEGER NOT NULL, day TEXT NOT NULL,
   bill_no TEXT, total INTEGER NOT NULL, user_id INTEGER);
-CREATE TABLE IF NOT EXISTS purchase_items (id INTEGER PRIMARY KEY, purchase_id INTEGER NOT NULL, item_id INTEGER NOT NULL, qty INTEGER NOT NULL, rate INTEGER NOT NULL);
+CREATE TABLE IF NOT EXISTS purchase_items (id INTEGER PRIMARY KEY, purchase_id INTEGER NOT NULL, item_id INTEGER NOT NULL, qty INTEGER NOT NULL, rate INTEGER NOT NULL, expiry TEXT);
+-- What a WhatsApp message would do, held until the sender replies YES (one per person)
+CREATE TABLE IF NOT EXISTS pending (user_id INTEGER PRIMARY KEY, org_id INTEGER NOT NULL, action TEXT NOT NULL, ts TEXT NOT NULL);
 -- Goods coming back: from a customer (credit note) or to a supplier (debit note)
 CREATE TABLE IF NOT EXISTS returns (
   id INTEGER PRIMARY KEY, org_id INTEGER NOT NULL, kind TEXT NOT NULL CHECK (kind IN ('sale','purchase')), branch_id INTEGER NOT NULL,
@@ -91,4 +93,4 @@ CREATE INDEX IF NOT EXISTS moves_item ON stock_moves (item_id, branch_id);
 
 export const TABLES = ['orgs', 'branches', 'users', 'items', 'stock', 'stock_moves', 'customers', 'sales',
   'sale_items', 'payments', 'cash_closings', 'insights', 'briefs', 'messages', 'audit',
-  'suppliers', 'ledgers', 'vouchers', 'voucher_lines', 'purchases', 'purchase_items', 'period_locks', 'returns', 'return_items']
+  'suppliers', 'ledgers', 'vouchers', 'voucher_lines', 'purchases', 'purchase_items', 'period_locks', 'returns', 'return_items', 'pending']

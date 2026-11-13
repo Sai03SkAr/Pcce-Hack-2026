@@ -4,7 +4,7 @@ import path from 'node:path'
 // Local file by default; point DATABASE_URL at a hosted libSQL/Turso database to deploy.
 const g = globalThis as unknown as { __pedhiDb?: Client }
 export const db: Client = (g.__pedhiDb ??= createClient({
-  url: process.env.DATABASE_URL ?? 'file:' + path.join(process.cwd(), 'pedhi.db'),
+  url: process.env.DATABASE_URL || 'file:' + path.join(process.cwd(), 'pedhi.db'),
   authToken: process.env.DATABASE_AUTH_TOKEN,
 }))
 

@@ -1,3 +1,4 @@
+import { createHmac, timingSafeEqual } from 'node:crypto'
 import { handleInbound } from '@/lib/ingest'
 import { ready } from '@/lib/seed'
 import { userByPhone } from '@/lib/session'
@@ -11,10 +12,21 @@ export async function GET(req: Request) {
   return new Response('Forbidden', { status: 403 })
 }
 
-// shortcut: no X-Hub-Signature-256 check yet; add it with the app secret before using a production number.
+// Meta signs every POST with the app secret; without WHATSAPP_APP_SECRET set, anyone could post fake messages.
+function signed(raw: string, header: string | null) {
+  const secret = process.env.WHATSAPP_APP_SECRET
+  if (!secret) return process.env.NODE_ENV !== 'production' // dev and demo only
+  const want = Buffer.from('sha256=' + createHmac('sha256', secret).update(raw).digest('hex'))
+  const got = Buffer.from(header ?? '')
+  return got.length === want.length && timingSafeEqual(got, want)
+}
+
 export async function POST(req: Request) {
+  const raw = await req.text()
+  if (!signed(raw, req.headers.get('x-hub-signature-256'))) return new Response('Bad signature', { status: 401 })
   await ready()
-  const body = await req.json().catch(() => null)
+  let body: any = null
+  try { body = JSON.parse(raw) } catch {}
   const msgs = body?.entry?.flatMap((e: any) => e.changes?.flatMap((c: any) => c.value?.messages ?? []) ?? []) ?? []
   for (const m of msgs) {
     if (m.type !== 'text' || !m.from) continue

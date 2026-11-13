@@ -7,6 +7,7 @@ import { logout, resetDemo, setBranch, setLang } from '@/app/actions'
 import { Wordmark } from './Logo'
 import { HelpWidget } from './HelpWidget'
 import { InstallApp } from './InstallApp'
+import { Live } from './Live'
 
 type Item = { href: string; label: string; icon: typeof Sun; who: string[] }
 const NAV: Item[] = [
@@ -100,10 +101,10 @@ export function Shell({ user, branches, branchId, lang, ai, children }: ShellPro
         <header className="sticky top-0 z-20 flex items-center gap-2 border-b border-line bg-paper/85 px-4 pb-2.5 pt-[max(0.625rem,env(safe-area-inset-top))] backdrop-blur-md sm:px-6 lg:px-8 print:hidden">
           <div className="lg:hidden"><Wordmark /></div>
           <div className="ml-auto flex items-center gap-2">
+            <Live />
             {branchPicker}
             {user.branch && <span className="chip chip-gold h-8 px-3 text-[13px]"><Building2 className="size-3.5" />{user.branch}</span>}
             {langToggle}
-            
           </div>
         </header>
         <main className={`mx-auto max-w-[1240px] px-4 pb-28 pt-5 sm:px-6 lg:px-8 lg:pb-12 transition-opacity ${pending ? 'opacity-60' : ''}`}>{children}</main>

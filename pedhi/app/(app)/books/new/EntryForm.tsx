@@ -4,6 +4,7 @@ import { useMemo, useState, useTransition } from 'react'
 import { ArrowDownLeft, ArrowLeft, ArrowLeftRight, ArrowUpRight, Check, Home, Landmark, PackagePlus, Plus, Search, Trash2, Truck, Undo2, Wallet } from 'lucide-react'
 import { bookAddSupplier, bookExpense, bookMove, bookOwner, bookPaySupplier, bookPurchase, bookReceipt, bookReturnPurchase } from '@/app/actions'
 import { VoucherView, type VoucherRow } from '@/components/VoucherView'
+import { NewItem } from '@/app/(app)/inventory/NewItem'
 
 type Acc = { id: number; name: string; bank: boolean; branch_id: number | null; balance: number }
 type Party = { id: number; name: string; owes: number; state?: string }
@@ -89,7 +90,8 @@ export function EntryForm(props: {
   const [mode, setMode] = useState<'credit' | 'paid'>(d.mode ?? 'credit')
   const [billNo, setBillNo] = useState('')
   const [branch, setBranch] = useState(props.pre.branch ?? props.defaultBranch)
-  const [lines, setLines] = useState<{ itemId: number; qty: number; rate: number }[]>(
+  const [items, setItems] = useState(props.items)
+  const [lines, setLines] = useState<{ itemId: number; qty: number; rate: number; expiry?: string }[]>(
     d.lines ?? (props.pre.item ? [{ itemId: props.pre.item, qty: props.pre.qty ?? 1, rate: props.items.find((i) => i.id === props.pre.item)?.cost ?? 0 }] : []))
   const [search, setSearch] = useState('')
   const [newSup, setNewSup] = useState<{ name: string; gstin: string; state: string } | null>(null)
@@ -99,13 +101,13 @@ export function EntryForm(props: {
   const [pending, start] = useTransition()
   const fromDraft = !!props.draft
 
-  const item = (id: number) => props.items.find((i) => i.id === id)!
+  const item = (id: number) => items.find((i) => i.id === id)!
   const ptotal = lines.reduce((s, l) => s + Math.round(l.qty * l.rate), 0)
   const pgst = lines.reduce((s, l) => { const r = item(l.itemId).gst_rate; const v = Math.round(l.qty * l.rate); return s + v - Math.round((v * 100) / (100 + r)) }, 0)
   const found = useMemo(() => {
     const s = search.toLowerCase().trim()
-    return s ? props.items.filter((i) => i.name.toLowerCase().includes(s) || i.aliases.includes(s)).slice(0, 6) : []
-  }, [search, props.items])
+    return s ? items.filter((i) => i.name.toLowerCase().includes(s) || i.aliases.includes(s)).slice(0, 6) : []
+  }, [search, items])
   const cashAcc = props.accounts.find((x) => x.id === acc)
 
   const save = () => start(async () => {
@@ -194,12 +196,15 @@ export function EntryForm(props: {
             <ul className="space-y-2">
               {lines.map((l, i) => (
                 <li key={i} className="flex flex-wrap items-center gap-2 rounded-[11px] border border-line p-2.5">
-                  <span className="min-w-0 flex-1 text-[13.5px] font-semibold">{item(l.itemId).name}<span className="ml-1.5 font-normal text-muted">GST {item(l.itemId).gst_rate}%</span></span>
+                  <span className="w-full min-w-0 text-[13.5px] font-semibold sm:w-auto sm:flex-1">{item(l.itemId).name}<span className="ml-1.5 font-normal text-muted">GST {item(l.itemId).gst_rate}%</span></span>
                   <input value={l.qty} onChange={(e) => setLines(lines.map((x, j) => (j === i ? { ...x, qty: num(e.target.value) } : x)))} inputMode="numeric" className="input num h-9 w-20" aria-label="Quantity" />
                   <span className="text-[12px] text-muted">{item(l.itemId).unit} × ₹</span>
                   <input value={l.rate} onChange={(e) => setLines(lines.map((x, j) => (j === i ? { ...x, rate: num(e.target.value) } : x)))} inputMode="numeric" className="input num h-9 w-24" aria-label="Rate" />
-                  <span className="num w-24 text-right text-[13.5px] font-semibold">{inr(l.qty * l.rate)}</span>
+                  <span className="num ml-auto w-24 text-right text-[13.5px] font-semibold">{inr(l.qty * l.rate)}</span>
                   <button type="button" onClick={() => setLines(lines.filter((_, j) => j !== i))} className="text-muted hover:text-bahi" aria-label="Remove"><Trash2 className="size-4" /></button>
+                  {a === 'purchase' && <label className="flex w-full items-center gap-2 text-[12.5px] text-muted">Use before
+                    <input type="date" value={l.expiry ?? ''} onChange={(e) => setLines(lines.map((x, j) => (j === i ? { ...x, expiry: e.target.value } : x)))} className="input h-8 w-40 text-[13px]" aria-label={`Expiry date for ${item(l.itemId).name}`} />
+                    <span className="hidden sm:inline">optional · cement, paint, putty, adhesive</span></label>}
                 </li>
               ))}
             </ul>
@@ -207,6 +212,11 @@ export function EntryForm(props: {
               <input value={search} onChange={(e) => setSearch(e.target.value)} className="input pl-9" placeholder="Add an item: cement, pipe, putty…" aria-label="Add item" /></div>
             {found.length > 0 && <div className="mt-2 flex flex-wrap gap-1.5">{found.map((i) => (
               <button type="button" key={i.id} onClick={() => { setLines([...lines, { itemId: i.id, qty: 1, rate: i.cost }]); setSearch('') }} className="rounded-full border border-line-2 bg-card px-3 py-1.5 text-[13px] hover:border-gold">{i.name}</button>))}</div>}
+            {a === 'purchase' && search.trim().length > 2 && !found.length && (
+              <div className="mt-2 flex flex-wrap items-center gap-2 rounded-[11px] bg-gold-soft p-3 text-[13px]">
+                <span className="flex-1">“{search.trim()}” is not in your stock list yet. Add it, then it comes in with this bill.</span>
+                <NewItem categories={[]} name0={search.trim()} label="Add as new item" onAdded={(it) => { setItems((xs) => [...xs, it]); setLines((ls) => [...ls, { itemId: it.id, qty: 1, rate: it.cost }]); setSearch('') }} />
+              </div>)}
             {lines.length > 0 && <div className="mt-3 flex justify-end gap-4 text-[13.5px] num"><span className="text-muted">of which GST {inr(pgst)} (input credit)</span><span className="font-semibold">Bill total {inr(ptotal)}</span></div>}
           </Field>
           <Field label={a === 'preturn' ? 'Money back?' : 'Paid?'}>

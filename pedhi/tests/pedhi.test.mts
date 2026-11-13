@@ -118,19 +118,85 @@ test('message parser reads Hinglish sales and payments', async () => {
   assert.equal(parseMessage('aaj kitni sale hui?', cat).intent, 'other')
 })
 
-test('a WhatsApp message becomes a bill, and UNDO takes it back', async () => {
+test('a WhatsApp message is shown back first, saved only on YES, and UNDO takes it back', async () => {
   const raju = (await userById(4))!
-  const before = (await salesSummary({ orgId: 1, branchId: 3 }, today(), today())).bills
+  const bills = async () => (await salesSummary({ orgId: 1, branchId: 3 }, today(), today())).bills
+  const before = await bills()
   const r = await handleInbound(raju, 'Dhavalikar ko 10 bori ACC cement diya udhaar pe')
-  assert.equal(r.kind, 'sale')
+  assert.equal(r.kind, 'confirm')
   assert.match(r.reply, /Total ₹4,100/)
-  assert.equal((await salesSummary({ orgId: 1, branchId: 3 }, today(), today())).bills, before + 1)
-  assert.equal((await handleInbound(raju, 'undo')).kind, 'undo')
-  assert.equal((await salesSummary({ orgId: 1, branchId: 3 }, today(), today())).bills, before)
+  assert.equal(await bills(), before, 'nothing is written before YES')
+  assert.equal((await handleInbound(raju, 'no')).kind, 'cancel')
+  assert.equal(await bills(), before)
 
-  const pay = await handleInbound(raju, 'Sawant ne 5000 cash diye')
+  await handleInbound(raju, 'Dhavalikar ko 10 bori ACC cement diya udhaar pe')
+  const ok = await handleInbound(raju, 'haan')
+  assert.equal(ok.kind, 'sale')
+  assert.equal(await bills(), before + 1)
+  assert.equal((await handleInbound(raju, 'undo')).kind, 'undo')
+  assert.equal(await bills(), before)
+
+  assert.equal((await handleInbound(raju, 'Sawant ne 5000 cash diye')).kind, 'confirm')
+  const pay = await handleInbound(raju, 'yes')
   assert.equal(pay.kind, 'payment')
   assert.match(pay.reply, /27,700/)
+})
+
+test('new goods on WhatsApp: Pedhi asks before adding the item, then books the stock with its expiry', async () => {
+  const rohan = (await userById(3))!, raju = (await userById(4))!
+  const ask = await handleInbound(rohan, '20 bag Dalmia cement aaya from Goa Cement Agencies exp 15/02/2027')
+  assert.equal(ask.kind, 'confirm')
+  assert.match(ask.reply, /Dalmia Cement\* is new/)
+  assert.match(ask.reply, /GST 28%/, 'copies tax and unit from a similar cement')
+  assert.equal(await one('SELECT id FROM items WHERE name=?', ['Dalmia Cement']), undefined, 'nothing added before YES')
+
+  const added = await handleInbound(rohan, 'YES 395 355')
+  assert.match(added.reply, /Added \*Dalmia Cement\*/)
+  assert.match(added.reply, /Stock in at Mapusa from Goa Cement Agencies/)
+  assert.match(added.reply, /Bill ₹7,100/)
+  const it = (await one<any>('SELECT * FROM items WHERE name=?', ['Dalmia Cement']))!
+  assert.deepEqual([it.gst_rate, it.unit, it.category, it.price, it.cost], [28, 'bag', 'Cement', 395, 355])
+
+  const saved = await handleInbound(rohan, 'yes')
+  assert.equal(saved.kind, 'stock_in')
+  assert.equal((await one<any>('SELECT qty FROM stock WHERE item_id=? AND branch_id=2', [it.id]))!.qty, 20)
+  assert.equal((await one<any>('SELECT pi.expiry FROM purchase_items pi WHERE pi.item_id=?', [it.id]))!.expiry, '2027-02-15')
+  const v = (await one<any>(`SELECT SUM(vl.amount) s, COUNT(*) n FROM vouchers v JOIN voucher_lines vl ON vl.voucher_id=v.id WHERE v.purchase_id=(SELECT purchase_id FROM purchase_items WHERE item_id=?)`, [it.id]))!
+  assert.deepEqual([v.s, v.n > 1], [0, true], 'the purchase is a balanced voucher, not a bare stock change')
+
+  const staff = await handleInbound(raju, 'Dhavalikar ko 2 bag Ramco cement udhaar')
+  assert.match(staff.reply, /Ramco Cement\* stock list mein nahi hai/)
+})
+
+test('stock plan: expiring lots, reorder by supplier, and items sorted into what sells and what earns', async () => {
+  const { expiring, reorderList, itemPerformance, orderMessage } = await import('../lib/stockplan')
+  const { parseExpiry } = await import('../lib/match')
+  assert.equal(parseExpiry('exp 03/2027'), '2027-03-31')
+  assert.equal(parseExpiry('expiry 15-01-27'), '2027-01-15')
+  assert.equal(parseExpiry('exp 31/02/2027'), null)
+
+  const soon = await expiring({ orgId: 1 }, 30)
+  assert.ok(soon.some((b) => b.name.startsWith('Birla White') && b.branch === 'Ponda' && b.days_left === 6))
+  const ins = await computeInsights(1)
+  assert.ok(ins.some((i) => i.type === 'expiry' && i.severity === 'high' && /Birla White/.test(i.title_en)))
+  const { getBrief } = await import('../lib/brief')
+  assert.match((await getBrief((await userById(2))!, { orgId: 1 }, 'en', true)).body, /\*Expiring soon:\* 13 bag Birla White/, 'the family hears about it every morning')
+
+  const orders = await reorderList({ orgId: 1 })
+  assert.ok(orders.length && orders.every((g) => g.lines.every((l) => l.order > 0)))
+  assert.match(orderMessage(orders[0], 'Naik Traders'), /please send:[\s\S]*Naik Traders$/)
+
+  const perf = await itemPerformance({ orgId: 1 })
+  const sold = perf.filter((p) => p.revenue > 0)
+  const lines = (await one<any>('SELECT SUM(si.qty*si.price) v FROM sale_items si JOIN sales x ON x.id=si.sale_id WHERE x.org_id=1 AND x.day >= ?', [addDays(today(), -29)]))!.v
+  assert.equal(sold.reduce((s, p) => s + p.revenue, 0), lines, 'every rupee of the last 30 days lands on exactly one item')
+  assert.ok(perf.some((p) => p.tag === 'star') && perf.some((p) => p.tag === 'dead'))
+
+  const suresh = (await userById(1))!, raju = (await userById(4))!
+  assert.match((await answer(suresh, { orgId: 1 }, 'Kya expire hone wala hai?')).text, /Birla White/)
+  assert.match((await answer(suresh, { orgId: 1 }, 'What should I order?')).text, /^Order now/)
+  const staff = await answer(raju, { orgId: 1, branchId: 3 }, 'Which items have rising demand?')
+  assert.doesNotMatch(JSON.stringify(staff.evidence), /"profit"|"margin_pct"/, 'staff never see profit per item')
 })
 
 test('ask: answers match the metrics layer, and staff never see margin', async () => {
@@ -469,4 +535,7 @@ test('help guide covers khata and Tally features', async () => {
   assert.equal(top('How do I record a loan?'), 'advanced')
   assert.equal(top('Bank reconciliation kaise kare?'), 'bankreco')
   assert.equal(top('backup kaise le'), 'backup')
+  assert.equal(top('kaunsa maal expire hone wala hai'), 'expiry')
+  assert.equal(top('what should I order from the supplier'), 'stockplan')
+  assert.equal(top('naya maal aaya whatsapp pe kaise daale'), 'stockin')
 })

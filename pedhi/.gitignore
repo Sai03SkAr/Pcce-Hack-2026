@@ -41,3 +41,4 @@ yarn-error.log*
 next-env.d.ts
 pedhi.db*
 .env*.local
+!.env.example

@@ -17,6 +17,9 @@ const SUPPLIERS: [string, string, string, string | null][] = [
   ['Hubli Hardware Mart', 'Hardware', 'Karnataka', '29AAHFH5530T1Z3'],
   ['Sanguem Sand & Metal Suppliers', 'Aggregates', 'Goa', '30AAPFS7764U1Z5'],
 ]
+// Days a fresh delivery stays usable: cement sets in about 3 months, tile adhesive and putty last about a year. Brushes, tiles and steel don't expire.
+const SHELF: Record<string, number> = { Cement: 75, Paint: 360, Tiles: 300 }
+
 // Registered businesses among the customers (B2B in GSTR-1); one is across the border in Karnataka (IGST).
 const CUSTOMER_GST: Record<string, [string, string]> = {
   "D'Souza Builders": ['30AAKFD1203B1Z7', 'Goa'], 'Shree Datta Constructions': ['30AAMFS5521C1Z2', 'Goa'],
@@ -70,7 +73,7 @@ export async function seedBooks(orgId: number, day0: string, T: string) {
 
   // Purchases: the stock that came in, billed by the supplier for its category, on credit
   const sup = await q<any>('SELECT * FROM suppliers WHERE org_id=?', [orgId])
-  const moves = await q<any>(`SELECT m.branch_id, m.day, m.item_id, m.qty, i.cost, i.gst_rate, i.category FROM stock_moves m JOIN items i ON i.id=m.item_id
+  const moves = await q<any>(`SELECT m.branch_id, m.day, m.item_id, m.qty, i.cost, i.gst_rate, i.category, i.unit FROM stock_moves m JOIN items i ON i.id=m.item_id
     WHERE m.org_id=? AND m.type='purchase' AND m.qty > 0 ORDER BY m.day, m.branch_id`, [orgId])
   const groups = new Map<string, any[]>()
   for (const m of moves) { const k = `${m.day}|${m.branch_id}|${m.category}`; groups.set(k, [...(groups.get(k) ?? []), m]) }
@@ -82,7 +85,7 @@ export async function seedBooks(orgId: number, day0: string, T: string) {
     const total = ms.reduce((a, m) => a + m.qty * m.cost, 0)
     const billNo = `${s.name.split(' ')[0].slice(0, 3).toUpperCase()}/${day.slice(5, 7)}${day.slice(8)}/${branch}`
     purchases.push([++pid, orgId, +branch, s.id, day, billNo, total, null])
-    ms.forEach((m) => pitems.push([pid, m.item_id, m.qty, m.cost]))
+    ms.forEach((m) => pitems.push([pid, m.item_id, m.qty, m.cost, SHELF[m.category] && /^(bag|bucket)$/.test(m.unit) ? addDays(day, SHELF[m.category]) : null]))
     vs.push({ day, type: 'Purchase', branch: +branch, purchase: pid, party: L.supplier(s.id), narration: `Bought from ${s.name}, bill ${billNo}, on credit`,
       lines: [...gstLines(L, 'Purchase', ms.map((m) => ({ amount: m.qty * m.cost, rate: m.gst_rate })), s.state !== 'Goa'), { ledgerId: L.supplier(s.id), amount: -total }] })
     const payDay = addDays(day, 18) // suppliers give ~18 days' credit; the latest bills are still unpaid
@@ -131,6 +134,13 @@ export async function seedBooks(orgId: number, day0: string, T: string) {
     for (const [b, v] of banks) low.set(b, Math.min(low.get(b)!, v))
   }
 
+  // Planted: two deliveries that came in already old, so the expiry alerts have something real to say.
+  const ids = new Map((await q<any>('SELECT id, name FROM items WHERE org_id=?', [orgId])).map((r) => [r.name as string, r.id as number]))
+  for (const [name, branch, left] of [['Birla White Cement 5kg', 3, 6], ['JK Wall Putty 40kg', 2, 19]] as const) {
+    const pi = pitems.findLast((x) => x[1] === ids.get(name) && purchases[x[0] - 1][2] === branch)
+    if (pi) pi[4] = addDays(T, left)
+  }
+
   // Opening balances: enough in each bank never to go overdrawn; capital is everything the owner brought in.
   const round = (n: number) => Math.ceil(n / 50000) * 50000
   const opening = new Map<number, number>([[HDFC, round(-low.get(HDFC)! + 250000)], [SBI, round(-low.get(SBI)! + 150000)], ...cash.map((c) => [c.id, 15000] as [number, number])])
@@ -141,7 +151,7 @@ export async function seedBooks(orgId: number, day0: string, T: string) {
     for (const [id, amt] of opening) await t.execute({ sql: 'UPDATE ledgers SET opening=? WHERE id=?', args: [amt, id] })
     await t.execute({ sql: `UPDATE ledgers SET opening=? WHERE org_id=? AND kind='capital'`, args: [-capital, orgId] })
     await bulk(t, 'purchases', ['id', 'org_id', 'branch_id', 'supplier_id', 'day', 'bill_no', 'total', 'user_id'], purchases)
-    await bulk(t, 'purchase_items', ['purchase_id', 'item_id', 'qty', 'rate'], pitems)
+    await bulk(t, 'purchase_items', ['purchase_id', 'item_id', 'qty', 'rate', 'expiry'], pitems)
     vs.sort((a, b) => a.day.localeCompare(b.day))
     const seq: Record<string, number> = {}
     const PRE: Record<string, string> = { Receipt: 'RCT', Payment: 'PMT', Contra: 'CTR', Purchase: 'PUR' }

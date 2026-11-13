@@ -41,6 +41,7 @@ export function StockGrid({ rows, branches, focus, canManage, myBranch, money, f
         <div><p className="eyebrow">{focus ? cols[0].name : 'All branches, side by side'}</p><h1 className="display text-[30px] font-semibold leading-tight">Stock</h1></div>
         <div className="ml-auto flex flex-wrap items-center gap-3 pb-1">
           {money && <p className="text-[13.5px] text-muted">Stock value at cost <span className="num font-semibold text-ink">{inr(value)}</span></p>}
+          {money && <Link href="/inventory/plan" className="btn btn-sm btn-primary">Stock plan</Link>}
           {canManage && <NewItem categories={[...new Set(rows.map((r) => r.category))]} />}
         </div>
       </div>

@@ -8,6 +8,7 @@ import { ai, aiEnabled, MAIN, textOf } from './llm'
 import { loadCatalogue, parseMessage } from './match'
 import { branchComparison, customerLedger, receivables, salesByDay, salesSummary, stockStatus, topItems, type Scope } from './metrics'
 import { seesMoney, type User } from './session'
+import { expiring, itemPerformance, reorderList } from './stockplan'
 
 type Ctx = { user: User; scope: Scope; branches: { id: number; name: string }[] }
 export type Evidence = { tool: string; input: any; result: any }
@@ -101,10 +102,25 @@ const TOOLS: Record<string, { description: string; properties: any; required?: s
     run: async (ctx) => (await listInsights(ctx.scope)).filter((x) => x.status === 'open')
       .map((x) => ({ severity: x.severity, title: x.title_en, detail: x.detail_en, suggested_action: x.action?.label_en ?? null })),
   },
+  expiring_stock: {
+    description: 'Stock still on the shelf whose use-by date (from supplier bills) falls within the next N days, soonest first. Negative days_left means already expired.',
+    properties: { within_days: { type: 'integer', description: 'Look this many days ahead, default 30' }, ...BRANCH },
+    run: (ctx, i) => expiring(scopeFor(ctx, i.branch), Math.min(Math.max(+i.within_days || 30, 1), 365)),
+  },
+  reorder_list: {
+    description: 'Items that will run out before a new delivery could arrive, with how much to order, grouped by the supplier who last sent each one.',
+    properties: { ...BRANCH },
+    run: (ctx, i) => reorderList(scopeFor(ctx, i.branch)),
+  },
+  item_performance: {
+    description: 'Last 30 days per item: quantity sold, sales, profit, margin, demand trend against the 30 days before (up / down / flat), stock and days it lasts, and a tag: star (sells a lot, good margin), crowd (sells a lot, thin margin), push (good margin, slow), review, dead (no sale in 60 days).',
+    properties: { ...BRANCH },
+    run: (ctx, i) => itemPerformance(scopeFor(ctx, i.branch)),
+  },
 }
 
 // Counter staff never see cost, margin or stock value, including through the assistant.
-const HIDDEN = new Set(['margin', 'margin_pct', 'cost', 'value'])
+const HIDDEN = new Set(['margin', 'margin_pct', 'cost', 'value', 'profit'])
 const redact = (v: any): any => Array.isArray(v) ? v.map(redact)
   : v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).filter(([k]) => !HIDDEN.has(k)).map(([k, x]) => [k, redact(x)])) : v
 
@@ -194,6 +210,30 @@ async function ruleAnswer(ctx: Ctx, question: string): Promise<Answer> {
     return say(`Total udhaar outstanding for ${where}: ${inr(r.total_outstanding)}. Largest: ${list}.`, `${where} ka kul udhaar baki: ${inr(r.total_outstanding)}. Sabse bade: ${list}.`)
   }
 
+  if (/\b(expir\w*|expire|kharab|use by|purana maal)\b/.test(t)) {
+    const r = await runTool(ctx, 'expiring_stock', { branch, within_days: 30 }, evidence)
+    const list = r.slice(0, 6).map((x: any) => `${x.qty} ${x.unit} ${x.name} at ${x.branch} (${x.days_left < 0 ? 'expired' : x.days_left + ' days'})`).join('; ')
+    const listHi = r.slice(0, 6).map((x: any) => `${x.branch} mein ${x.qty} ${x.unit} ${x.name} (${x.days_left < 0 ? 'expire ho gaya' : x.days_left + ' din'})`).join('; ')
+    return say(r.length ? `Expiring in the next 30 days: ${list}. Sell these first.` : 'Nothing on the shelf expires in the next 30 days.',
+      r.length ? `Agle 30 din mein expire: ${listHi}. Pehle yahi becho.` : 'Agle 30 din mein kuch expire nahi ho raha.')
+  }
+
+  if (/\b(reorder|order|mangwa\w*|mangana|mangaye|purchase order)\b/.test(t)) {
+    const r = await runTool(ctx, 'reorder_list', { branch }, evidence)
+    const list = r.map((g: any) => `${g.supplier}: ${g.lines.map((l: any) => `${l.order} ${l.unit} ${l.name} (${l.branch})`).join(', ')}`).join('. ')
+    return say(r.length ? `Order now. ${list}. Stock plan has a ready WhatsApp message for each supplier.` : 'Nothing needs ordering yet: every item lasts longer than its delivery time.',
+      r.length ? `Abhi mangwao. ${list}. Stock plan mein har supplier ke liye WhatsApp message tayyar hai.` : 'Abhi kuch mangwane ki zaroorat nahi.')
+  }
+
+  if (/\b(demand|star|fast moving|slow moving|kaunsa item|which items?)\b/.test(t)) {
+    const r = await runTool(ctx, 'item_performance', { branch }, evidence)
+    const pick = (tag: string) => r.filter((x: any) => x.tag === tag).slice(0, 4).map((x: any) => x.name).join(', ') || 'none'
+    const up = r.filter((x: any) => x.trend === 'up' && x.qty).slice(0, 4).map((x: any) => x.name).join(', ') || 'none'
+    if (!money) return say(`Rising demand: ${up}.`, `Demand badh rahi hai: ${up}.`)
+    return say(`Stars (sell a lot, good margin): ${pick('star')}. Sell a lot on thin margin: ${pick('crowd')}. Good margin but slow, push these: ${pick('push')}. Rising demand: ${up}.`,
+      `Star (zyada bikta, accha munafa): ${pick('star')}. Zyada bikta par kam munafa: ${pick('crowd')}. Accha munafa par dheema, inko aage badhao: ${pick('push')}. Demand badh rahi: ${up}.`)
+  }
+
   if (/\b(dead|not sold|nahi bik|pada hua)\b/.test(t)) {
     const r = await runTool(ctx, 'stock_status', { branch, status: 'dead' }, evidence)
     const list = r.slice(0, 5).map((x: any) => `${x.name} (${x.qty} ${x.unit}, ${x.branch})`).join('; ')
@@ -246,7 +286,7 @@ async function ruleAnswer(ctx: Ctx, question: string): Promise<Answer> {
   }
 
   return say(
-    'I can answer questions about sales, stock, udhaar, top items and branches. Try: "How were sales this week?", "ACC cement stock?", "Who owes us money?", "Which branch has the lowest margin?"',
+    'I can answer questions about sales, stock, expiry, what to order, demand, udhaar, top items and branches. Try: "How were sales this week?", "ACC cement stock?", "Who owes us money?", "Which branch has the lowest margin?"',
     'Main sale, stock, udhaar, top items aur branch ke baare mein bata sakta hoon. Jaise: "Aaj kitni sale hui?", "ACC cement ka stock?", "Kiska udhaar baki hai?", "Kaunsi branch ka margin sabse kam hai?"')
 }
 

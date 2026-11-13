@@ -290,7 +290,7 @@ export async function shareStatement(customerId: number, renew = false) {
     const token = await Books.shareToken(u, customerId, renew)
     const { headers } = await import('next/headers')
     const h = await headers()
-    const base = process.env.PUBLIC_URL ?? `${h.get('x-forwarded-proto') ?? 'http'}://${h.get('x-forwarded-host') ?? h.get('host')}`
+    const base = process.env.PUBLIC_URL || `${h.get('x-forwarded-proto') ?? 'http'}://${h.get('x-forwarded-host') ?? h.get('host')}`
     return `${base}/s/${token}`
   })
 }
@@ -382,4 +382,21 @@ export async function restoreBackup(text: string) {
   })
   ;(await cookies()).delete('pedhi_branch')
   redirect('/')
+}
+
+// Meta sends numbers as digits with the country code (919822012345), so store them that way.
+export async function setUserPhone(userId: number, phone: string) {
+  const u = await getUser()
+  return act(async () => {
+    if (!isFamily(u)) throw new OpError('Only the family can change WhatsApp numbers.')
+    let d = phone.replace(/\D/g, '')
+    if (d.length === 10) d = '91' + d
+    if (d && (d.length < 11 || d.length > 15)) throw new OpError('Enter a 10-digit mobile number, or one with the country code.')
+    const p = await userById(userId)
+    if (!p || p.org_id !== u.org_id) throw new OpError('Person not found.')
+    if (d && await one('SELECT id FROM users WHERE phone=? AND id<>?', [d, userId])) throw new OpError('Someone else already has this number.')
+    await run('UPDATE users SET phone=? WHERE id=?', [d || null, userId])
+    await audit(u, u.org_id, 'phone', `Set WhatsApp number for ${p.name}`)
+    return null
+  }, 'Number saved.')
 }

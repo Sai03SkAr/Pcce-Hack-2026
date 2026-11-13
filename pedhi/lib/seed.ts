@@ -292,5 +292,8 @@ const g = globalThis as unknown as { __pedhiReady?: Promise<void> }
 export const ready = () =>
   (g.__pedhiReady ??= (async () => {
     const t = await q(`SELECT 1 FROM sqlite_master WHERE type='table' AND name='orgs'`)
-    if (!t.length || !(await q('SELECT 1 FROM orgs LIMIT 1')).length) await seed()
+    if (!t.length || !(await q('SELECT 1 FROM orgs LIMIT 1')).length) return void await seed()
+    // databases made before expiry dates and WhatsApp approvals existed
+    await db.execute('ALTER TABLE purchase_items ADD COLUMN expiry TEXT').catch(() => {})
+    await db.execute('CREATE TABLE IF NOT EXISTS pending (user_id INTEGER PRIMARY KEY, org_id INTEGER NOT NULL, action TEXT NOT NULL, ts TEXT NOT NULL)')
   })())

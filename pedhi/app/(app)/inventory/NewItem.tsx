@@ -6,10 +6,13 @@ import { bookAddItem } from '@/app/actions'
 
 const RATES = [0, 5, 12, 18, 28]
 
-/** New item: the details a shop actually knows. Stock then arrives through a purchase in Books. */
-export function NewItem({ categories }: { categories: string[] }) {
+export type AddedItem = { id: number; name: string; unit: string; gst_rate: number; cost: number; price: number; aliases: string }
+
+/** New item: the details a shop actually knows. Stock then arrives through a purchase in Books.
+ *  With onAdded (the purchase form), the new item goes straight back to the caller instead. */
+export function NewItem({ categories, name0 = '', onAdded, label = 'New item' }: { categories: string[]; name0?: string; onAdded?: (i: AddedItem) => void; label?: string }) {
   const [open, setOpen] = useState(false)
-  const [f, setF] = useState({ name: '', category: '', unit: 'pc', hsn: '', gst: 18, cost: '', price: '', aliases: '' })
+  const [f, setF] = useState({ name: name0, category: '', unit: 'pc', hsn: '', gst: 18, cost: '', price: '', aliases: '' })
   const [err, setErr] = useState('')
   const [done, setDone] = useState<{ id: number; name: string } | null>(null)
   const [pending, start] = useTransition()
@@ -17,7 +20,7 @@ export function NewItem({ categories }: { categories: string[] }) {
   const num = (s: string) => parseInt(s.replace(/\D/g, '')) || 0
   const close = () => { setOpen(false); setDone(null); setErr(''); setF({ name: '', category: '', unit: 'pc', hsn: '', gst: 18, cost: '', price: '', aliases: '' }) }
 
-  if (!open) return <button className="btn btn-sm" onClick={() => setOpen(true)}><PackagePlus className="size-3.5" />New item</button>
+  if (!open) return <button type="button" className="btn btn-sm" onClick={() => { setF((x) => ({ ...x, name: name0 })); setOpen(true) }}><PackagePlus className="size-3.5" />{label}</button>
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-ink/40 p-4" onClick={close}>
       <div role="dialog" aria-modal="true" aria-label="New item" className="card rise max-h-[90dvh] w-full max-w-md overflow-auto p-5" onClick={(e) => e.stopPropagation()}>
@@ -29,11 +32,13 @@ export function NewItem({ categories }: { categories: string[] }) {
             <div className="flex gap-2"><Link href={`/books/new?a=purchase&item=${done.id}`} className="btn btn-primary">Record the purchase</Link><button className="btn" onClick={close}>Done</button></div>
           </div>
         ) : (
-          <form className="mt-3 space-y-3" onSubmit={(e) => { e.preventDefault(); start(async () => {
+          <form className="mt-3 space-y-3" onSubmit={(e) => { e.preventDefault(); e.stopPropagation(); start(async () => {
             setErr('')
             const r = await bookAddItem({ name: f.name, category: f.category, unit: f.unit, hsn: f.hsn, gstRate: +f.gst, cost: num(f.cost), price: num(f.price), aliases: f.aliases })
             if (!r.ok) return setErr(r.error)
-            setDone(r.data as { id: number; name: string })
+            const it = r.data as { id: number; name: string }
+            if (onAdded) { onAdded({ ...it, unit: f.unit.trim() || 'pc', gst_rate: +f.gst, cost: num(f.cost), price: num(f.price), aliases: f.aliases.toLowerCase() }); return close() }
+            setDone(it)
           }) }}>
             <label className="block text-[13px] font-medium">Item name<input autoFocus value={f.name} onChange={set('name')} className="input mt-1" placeholder="Asian Paints Apex 10L White" /></label>
             <div className="grid grid-cols-2 gap-2">

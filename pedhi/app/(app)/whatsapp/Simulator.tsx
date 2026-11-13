@@ -2,7 +2,7 @@
 import Link from 'next/link'
 import { useEffect, useOptimistic, useRef, useState, useTransition } from 'react'
 import { CheckCheck, Radio, SendHorizontal, Sunrise } from 'lucide-react'
-import { pushBrief, simulateMessage } from '@/app/actions'
+import { pushBrief, setUserPhone, simulateMessage } from '@/app/actions'
 import { WaText } from '@/components/BriefCard'
 import { Mic } from '@/components/Mic'
 
@@ -29,7 +29,7 @@ export function Simulator({ me, people, as, msgs, samples, live }: { me: { id: n
   const owner = people.find((p) => p.role === 'owner')
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,420px)_minmax(0,1fr)]">
+    <div className="grid gap-6 lg:grid-cols-[220px_minmax(0,420px)] xl:grid-cols-[260px_minmax(0,420px)_minmax(0,1fr)]">
       <section>
         <h1 className="display text-[30px] font-semibold leading-tight">The counter, on chat</h1>
         <p className="mt-2 hidden text-[13.5px] text-ink-2 sm:block">Staff send a sale or a payment the way they already text. Pedhi books it, updates stock and udhaar, and replies.</p>
@@ -74,7 +74,7 @@ export function Simulator({ me, people, as, msgs, samples, live }: { me: { id: n
         {note && <p role="alert" className="mt-2 text-center text-[13px] text-bahi">{note}</p>}
       </section>
 
-      <section className="space-y-3">
+      <section className="space-y-3 lg:col-span-2 lg:grid lg:grid-cols-2 lg:gap-3 lg:space-y-0 xl:col-span-1 xl:block xl:space-y-3">
         {me.family && owner && (
           <div className="card p-4">
             <h2 className="flex items-center gap-2 font-semibold"><Sunrise className="size-4 text-gold" />7:00 am brief</h2>
@@ -88,15 +88,38 @@ export function Simulator({ me, people, as, msgs, samples, live }: { me: { id: n
           <h2 className="flex items-center gap-2 font-semibold"><Radio className={`size-4 ${live ? 'text-leaf' : 'text-muted'}`} />{live ? 'Live WhatsApp connected' : 'Simulator mode'}</h2>
           <p className="mt-1 text-ink-2">{live ? 'Messages to the business number are handled by the same code you see here.' : 'This chat runs the exact handler the WhatsApp Cloud API webhook uses. Set WHATSAPP_TOKEN, WHATSAPP_PHONE_NUMBER_ID and WHATSAPP_VERIFY_TOKEN, then point Meta’s webhook at /api/whatsapp.'}</p>
         </div>
+        {me.family && <Numbers people={people} />}
         <div className="card p-4 text-[13px] text-ink-2">
           <h2 className="font-semibold text-ink">What it understands</h2>
           <ul className="mt-2 list-disc space-y-1 pl-4">
             <li>Sales: “Ramesh ko 10 bori ACC cement udhaar”</li><li>Payments: “Kamat ne 15000 UPI se diye”</li>
-            <li>Questions: “Aaj kitni sale hui?”</li><li>“undo” cancels your last WhatsApp bill · “brief” for today’s brief</li>
+            <li>Stock in: “50 bori ACC cement aaya exp 03/2027”. A new item? Pedhi asks before adding it.</li>
+            <li>Questions: “Aaj kitni sale hui?”, “Kya expire hone wala hai?”</li><li>“undo” cancels your last WhatsApp bill · “brief” for today’s brief</li>
           </ul>
+          <p className="mt-2 font-medium text-ink">Pedhi shows what it understood first. Nothing is saved until the sender replies YES.</p>
           <p className="mt-2 text-muted">Only registered numbers can record anything. Credit limits and branch rules apply here too.</p>
         </div>
       </section>
+    </div>
+  )
+}
+
+function Numbers({ people }: { people: P[] }) {
+  const [vals, setVals] = useState<Record<number, string>>(Object.fromEntries(people.map((p) => [p.id, p.phone ?? ''])))
+  const [msg, setMsg] = useState('')
+  const [pending, start] = useTransition()
+  return (
+    <div className="card p-4 text-[13px]">
+      <h2 className="font-semibold">WhatsApp numbers</h2>
+      <p className="mt-1 text-ink-2">Only these numbers can talk to Pedhi. Messages from any other number are ignored.</p>
+      <ul className="mt-3 space-y-2">{people.map((p) => (
+        <li key={p.id}><form className="flex items-center gap-2" onSubmit={(e) => { e.preventDefault(); start(async () => { const r = await setUserPhone(p.id, vals[p.id]); setMsg(r.ok ? `${p.name}: ${r.message}` : r.error) }) }}>
+          <span className="w-24 shrink-0 truncate font-medium">{p.name.split(' ')[0]}</span>
+          <input value={vals[p.id]} onChange={(e) => setVals({ ...vals, [p.id]: e.target.value })} inputMode="tel" aria-label={`${p.name} WhatsApp number`} className="input num h-9 min-w-0 flex-1" placeholder="98220 12345" />
+          <button className="btn btn-sm" disabled={pending || vals[p.id] === (p.phone ?? '')}>Save</button>
+        </form></li>))}
+      </ul>
+      {msg && <p role="status" className="mt-2 text-[12.5px] text-ink-2">{msg}</p>}
     </div>
   )
 }

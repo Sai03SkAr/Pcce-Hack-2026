@@ -23,9 +23,16 @@ To cancel a wrong bill, open it and press Cancel bill. The stock goes back and t
   { id: 'voice', title: 'Using voice', href: '/bill', body: `Tap the microphone button and speak in Hindi, English or Hinglish. It works in Chrome, Edge and Safari.
 Voice works on the bill screen, in Books ("Tell Pedhi"), in Ask Pedhi and in the WhatsApp chat.
 If the mic does not appear, your browser does not support speech input: type instead. If it appears but nothing happens, allow microphone access in the browser.` },
-  { id: 'whatsapp', title: 'Billing on WhatsApp', href: '/whatsapp', body: `Staff can send a sale as a WhatsApp message, like "Dhavalikar ko 10 bori ACC cement udhaar". Pedhi makes the bill, updates stock and udhaar, and replies with the total and stock left.
-A payment: "Kamat ne 15000 UPI se diye". A question: "Aaj kitni sale hui?". Send "undo" to cancel your last WhatsApp bill and "brief" for today's brief.
-Only phone numbers registered for the business can record anything. The WhatsApp screen is a working simulator of the same handler the real WhatsApp Cloud API uses.` },
+  { id: 'whatsapp', title: 'Billing on WhatsApp', href: '/whatsapp', body: `Staff can send a sale as a WhatsApp message, like "Dhavalikar ko 10 bori ACC cement udhaar". Pedhi replies with the bill it understood: items, total, customer and mode. Reply YES to save it or NO to cancel. Nothing is written until you say YES.
+A payment: "Kamat ne 15000 UPI se diye", then YES. A question: "Aaj kitni sale hui?". Send "undo" to cancel your last WhatsApp bill and "brief" for today's brief.
+Only phone numbers registered for the business can record anything. The family sets each person's number on the WhatsApp screen. The WhatsApp screen is a working simulator of the same handler the real WhatsApp Cloud API uses.` },
+  { id: 'stockin', title: 'Stock arrived (and new items) on WhatsApp', href: '/whatsapp', body: `When goods arrive, a manager or the family sends "50 bori ACC cement aaya" or "20 bag Dalmia cement aaya from Shree Agencies exp 03/2027". Pedhi shows the supplier bill it will record (last buying price, on credit) and saves it on YES: stock goes up in that branch for everyone at once, and the supplier is owed.
+If the item is not in your stock list, Pedhi asks before adding it. Reply YES with the selling and buying price, like YES 395 355. It copies the GST rate and unit from a similar item. Staff cannot add items.` },
+  { id: 'expiry', title: 'Expiry dates and expiring stock', href: '/inventory/plan#expiry', body: `When you record a purchase (Books, Bought stock), each item has a Use before date. Fill it for cement, paint, putty, adhesive and anything else that goes bad. On WhatsApp add "exp 03/2027" to the message.
+Pedhi works out what is still on the shelf (older stock sells first) and warns the family on Today and in the morning brief 30 days before expiry, in red a week before. Stock plan lists everything due in the next 30 days.` },
+  { id: 'stockplan', title: 'Stock plan: what to order, demand and profit by item', href: '/inventory/plan', body: `Stock, Stock plan shows three things. Order now: every item that will run out before the supplier can deliver, with how much to order, grouped by supplier, with a ready WhatsApp order message and a button to record the bill when it arrives.
+Expiring soon. And What sells, what earns: every item's sales, profit, margin and whether demand is rising or falling. Stars sell a lot at a good margin, Crowd-pullers sell a lot on a thin margin, Push it items earn well but sell slowly, Not moving have not sold in 60 days.
+Every screen updates on its own when anyone at any branch saves a bill, payment or delivery: the green Live dot at the top.` },
   { id: 'udhaar', title: 'Udhaar and payment reminders', href: '/customers', body: `Udhaar shows what each customer owes, the age of their oldest unpaid bill, and how much of their credit limit they have used. Payments are applied to the oldest bills first.
 Press Remind (or Remind all overdue) to prepare a polite WhatsApp message with a UPI link for the exact amount. Open each one in WhatsApp to send it.
 To record money received, open the customer and use Record a payment, or Books → Money came in. Notes on a customer ("pays after the monsoon contract") are kept for the family and used by Ask Pedhi.` },
@@ -114,6 +121,7 @@ const SYN: Record<string, string> = {
   ca: 'ca', accountant: 'ca', sign: 'sign', lock: 'lock', gst: 'gst', gstr: 'gst', itc: 'credit', profit: 'profit', munafa: 'profit',
   bharna: 'file', bharni: 'file', filing: 'file', purana: 'old', puraana: 'old', pichla: 'old', nuksaan: 'loss', kam: 'short', nikla: 'short', shortage: 'short', ghata: 'short', closing: 'close', band: 'close', bank: 'bank', cash: 'cash', nagad: 'cash', galla: 'cash', awaaz: 'voice', bolke: 'voice', mic: 'voice',
   branch: 'branch', dukaan: 'branch', transfer: 'transfer', bhejo: 'transfer', staff: 'staff', naukar: 'staff', excel: 'import', sheet: 'import',
+  expire: 'expiry', expired: 'expiry', expiring: 'expiry', kharab: 'expiry', mangwana: 'order', mangwau: 'order', reorder: 'order', aaya: 'arrived', aayi: 'arrived',
   supplier: 'supplier', dealer: 'supplier', vyapari: 'supplier', grahak: 'customer', customer: 'customer', malik: 'owner', ghar: 'owner', drawings: 'owner',
 }
 const STOP = new Set('a an the to of in on for and or is are was be it this that how do i my me we our what kya kaise kahan ka ki ke ko se hai hain mein main karu karna kare kar ho with can you your please batao'.split(' '))

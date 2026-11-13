@@ -11,10 +11,10 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:3000 and pick a person (the owner, family, a branch manager, counter staff, or the CA). The database (`pedhi.db`) is created and filled with 90 days of history for **Naik Traders** (three branches in Goa) on the first request. No accounts or keys are needed.
+Open http://localhost:3000 (or double-click `../Start Pedhi.command` on a Mac, which uses port 3100) and pick a person (the owner, family, a branch manager, counter staff, or the CA). The database (`pedhi.db`) is created and filled with 90 days of history for **Naik Traders** (three branches in Goa) on the first request. No accounts or keys are needed.
 
 ```bash
-npm test        # 30 tests: planted stories, ledger rules, permissions, parsers, WhatsApp, ask, double-entry books, GST, CA lock, help guide
+npm test        # 32 tests: planted stories, ledger rules, permissions, parsers, WhatsApp, ask, double-entry books, GST, CA lock, help guide
 npm run seed    # reset the demo data (also: "Reset demo data" in the sidebar when signed in as the owner)
 ```
 
@@ -24,7 +24,10 @@ npm run seed    # reset the demo data (also: "Reset demo data" in the sidebar wh
 |---|---|
 | `ANTHROPIC_API_KEY` | AI-written brief, free-form "Ask Pedhi", AI message parsing and AI column mapping. Without it every feature runs on the rule engine. |
 | `PEDHI_MODEL`, `PEDHI_FAST_MODEL` | Override the models (defaults `claude-opus-5-5` and `claude-haiku-5-5`). |
-| `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_VERIFY_TOKEN` | Real WhatsApp via Meta's Cloud API. Point the webhook at `/api/whatsapp`. Seeded users' phone numbers are in `lib/seed.ts`; change one to your own to test. |
+| `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_VERIFY_TOKEN`, `WHATSAPP_APP_SECRET` | Real WhatsApp via Meta's Cloud API. Point the webhook at `/api/whatsapp`; the app secret turns on Meta's signature check. The owner sets each person's number on the WhatsApp screen. |
+| `CRON_SECRET`, `PUBLIC_URL` | The daily reminder job (`/api/cron/reminders`) and the base address used in statement links. |
+
+All variables are listed in `.env.example`.
 | `DATABASE_URL`, `DATABASE_AUTH_TOKEN` | Use a hosted libSQL / Turso database instead of the local file (needed to deploy on Vercel). |
 
 ## What is in it
@@ -34,12 +37,13 @@ npm run seed    # reset the demo data (also: "Reset demo data" in the sidebar wh
 | **Today** | The morning brief (as the owner sees it on WhatsApp), KPIs, issues ranked by rupees at stake with one-tap fixes, 30-day sales by branch, top sellers, branch cards |
 | **New bill** | Counter billing: search, tap, or say the whole bill ("Ramesh ko 10 bori ACC cement udhaar"); cash / UPI / udhaar; stock and credit-limit checks; GST invoice |
 | **Stock** | Every item across every branch side by side, coloured by status (out, low, not moving); stock received, transfers between branches, corrections |
+| **Stock plan** | Order now (grouped by supplier, with a ready WhatsApp order and one tap to record the bill), stock expiring in 30 days, and per-item demand and profit: Stars, Crowd-pullers, Push it, Not moving |
 | **Day close** | Staff count the drawer at day end; Pedhi compares with the books, books any shortage, and flags repeats to the owner |
 | **Khata extras** | Old balances, got/gave/discount/write-off entries, credit days, a private statement link with UPI pay, automatic reminders, suppliers khata, customer import |
 | **Returns & advanced** | Credit and debit notes, Tally-style journal with templates, branch P&L, bank reconciliation, backup and restore |
 | **Udhaar** | Outstanding per customer with ageing buckets; reminders with a UPI link for the exact amount; customer ledger; payments; the family's notes on each customer |
 | **Ask Pedhi** | Questions in English, Hindi or Hinglish, typed or spoken. Every answer shows the queries behind it |
-| **WhatsApp** | A working chat: sales, payments, questions, `undo`, `brief`. Same handler as the real webhook |
+| **WhatsApp** | A working chat: sales, payments, stock arrived, questions, `undo`, `brief`. Pedhi shows what it understood and saves only on YES; a new item is added only after the sender approves it with its prices. Same handler as the real webhook |
 | **Import sheet** | Upload or paste a messy stock sheet; columns are mapped automatically, you check, it loads |
 | **Books** | Tally-style accounts without accounting words: Money came in, Bought stock, Paid a supplier, Paid an expense, Moved money, Owner money, or just say it ("HDFC se 4500 bijli ka bill bhara"). Every entry becomes a balanced voucher under Tally's groups |
 | **Day Book, Ledgers, P&L, Balance Sheet, Trial Balance** | The same reports Tally gives, printable and downloadable as CSV |
@@ -66,7 +70,8 @@ The model never calculates a number.
 - **Insight engine** (`lib/insights.ts`): plain rules find stock-outs, sales drops and their cause, overdue udhaar, dead stock, below-cost billing, cash shortfalls and customers who went quiet, and size each in rupees.
 - **Brief** (`lib/brief.ts`): built from those facts. With a key, the model only rewrites the wording, under instructions to copy every number exactly.
 - **Ask** (`lib/chat.ts`): the model picks which metric to run; our code runs it, enforces the user's branch and hides money fields from staff before the model ever sees the result.
-- **Writes** (`lib/ops.ts`): bills, payments and transfers go through one module with the business rules (stock, credit limits, branch walls, price edits). Chat tools are read-only.
+- **Writes** (`lib/ops.ts`, `lib/books.ts`): bills, payments, purchases and transfers go through one place with the business rules (stock, credit limits, branch walls, price edits). Chat tools are read-only. A WhatsApp message is only a proposal until the sender replies YES.
+- **Stock plan** (`lib/stockplan.ts`): reorder sizes, what is on the shelf from which delivery (oldest sells first) and its use-by date, and per-item demand and profit, all by rule.
 
 ## The demo story (planted in the seed)
 
@@ -77,18 +82,21 @@ The model never calculates a number.
 5. One counter keeps billing a TMT rod below cost.
 6. A regular contractor has not ordered in 25 days.
 7. Good news: Margao's best day in three months (Dhanteras).
+8. Two deliveries came in old: white cement at Ponda expires in 6 days, wall putty at Mapusa in 19.
 
 ### Four-minute walkthrough
 
 1. Sign in as **Suresh (Owner)**. Read the brief; switch to हिं.
 2. Tap **Transfer from Ponda** on the Mapusa issue.
-3. Open **WhatsApp**, chat as **Raju**: `Dhavalikar ko 10 bori ACC cement udhaar`. Show the reply, then the bill in **Sales** and the updated udhaar.
+3. Open **WhatsApp**, chat as **Raju**: `Dhavalikar ko 10 bori ACC cement udhaar`. Pedhi shows the bill; reply `haan`. Show the bill in **Sales** and the updated udhaar.
+   Then chat as **Rohan**: `20 bag Dalmia cement aaya exp 02/2027` → Pedhi asks to add the new item → `YES 395 355` → `yes`. Keep **Stock plan** open in a second window: it updates by itself.
 4. **Udhaar** → **Remind all overdue** → the message with its UPI link.
 5. **Ask Pedhi**: "Is hafte kaunsi branch ka margin sabse kam hai?" → open "How this was calculated".
 6. Sign in as **Raju**: billing only, no cost prices, and a credit sale over the limit is blocked.
 7. **Books** → tap the example "Goa Cement se 200 bag ACC cement liya udhaar" → Save → show the Tally voucher. Then **P&L · Balance Sheet** (both sides match) and **GST**.
 8. Sign in as **CA Prakash Kamat** → **CA pack** → download the Tally XML → **Sign off and lock**.
 9. **Import sheet** → **Try a messy sample**.
+10. **Stock → Stock plan**: what to order (send it to the supplier on WhatsApp), the white cement expiring in 6 days, and which items are Stars.
 
 The full research behind Books (how Tally works, why owners need an accountant, pricing) is in `../TALLY_RESEARCH_AND_ACCOUNTING_PLAN.md`.
 

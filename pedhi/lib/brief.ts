@@ -31,7 +31,9 @@ export async function briefFacts(scope: Scope) {
   })
   return {
     day: T, yesterday: Y, y, base, delta: base ? Math.round(((y.revenue - base) / base) * 100) : 0,
-    branches, outstanding, top: merged.slice(0, 3), good: all.find((i) => i.severity === 'good') ?? null,
+    branches, outstanding, top: merged.filter((i) => i.type !== 'expiry').slice(0, 3), good: all.find((i) => i.severity === 'good') ?? null,
+    // expiry always gets its own line: a small lot is cheap but going bad on the shelf is avoidable
+    expiry: open.filter((i) => i.type === 'expiry').sort((a, b) => a.key.slice(-10).localeCompare(b.key.slice(-10))).slice(0, 3),
   }
 }
 export type BriefFacts = Awaited<ReturnType<typeof briefFacts>>
@@ -58,6 +60,7 @@ export function renderBrief(f: BriefFacts, lang: Lang, u: User) {
       if (i.action) lines.push(`   👉 ${L(lang, i.action.label_en, i.action.label_hi)}`)
     })
   } else lines.push('', L(lang, 'Nothing needs your attention today.', 'Aaj sab theek hai.'))
+  if (f.expiry.length) lines.push('', L(lang, '*Expiring soon:* ', '*Jaldi expire:* ') + f.expiry.map((i) => L(lang, i.title_en, i.title_hi)).join('; ') + L(lang, '. Sell these first.', '. Pehle yahi becho.'))
   if (f.good) lines.push('', L(lang, `*Good news:* ${f.good.title_en}. ${f.good.detail_en}`, `*Acchi khabar:* ${f.good.title_hi}. ${f.good.detail_hi}`))
   return lines.join('\n')
 }
@@ -79,7 +82,7 @@ export async function getBrief(u: User, scope: Scope, lang: Lang, force = false)
       `You write the morning business brief that an Indian family business owner reads on WhatsApp.
 Rewrite the draft you are given so it reads naturally and warmly, like a trusted munim speaking to the owner.
 Rules: use only the facts in the draft. Copy every number, name and date exactly. Add no advice that is not in the draft.
-Keep the same order: greeting, yesterday's numbers, the things needing attention as a numbered list with each suggested action on its own line starting with 👉, then the good news.
+Keep the same order: greeting, yesterday's numbers, the things needing attention as a numbered list with each suggested action on its own line starting with 👉, the expiring stock line if there is one, then the good news.
 Under 150 words. WhatsApp formatting only (*bold*). At most three emojis. ${STYLE[lang]}`,
       `Reader: ${u.name} (${u.title}).\n\nDraft:\n${renderBrief(facts, 'en', u)}`, MAIN, 1500)
     source = 'ai'

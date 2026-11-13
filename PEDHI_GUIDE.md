@@ -47,12 +47,14 @@ The demo business is **Naik Traders**: hardware and building materials, three br
 Everything on my side is done. These are the only steps left for you, in order. **Steps 1 to 4 are needed for the hackathon; 5 to 8 are optional.**
 
 ### Step 1. Get the app running on the demo laptop (10 minutes)
+**Shortcut on a Mac:** double-click `Start Pedhi.command` in the `PCCE Hackathon` folder. It installs on first run, starts Pedhi on port 3100 and opens the browser. The manual steps are below.
+
 1. Install **Node.js 20 or newer** from https://nodejs.org (the LTS button). Check it in a terminal:
    ```bash
    node -v
    ```
    It should print v20 or higher.
-2. Copy the whole `PCCE Hackathon` folder to the demo laptop (pen drive, or Google Drive).
+2. Get the code onto the demo laptop: either copy the `PCCE Hackathon` folder, or clone your repo https://github.com/Sai03SkAr/Pcce-Hack-2026 (private; sign in to GitHub on that laptop).
 3. In a terminal, go into the app folder and install it once (needs internet, about 2 minutes):
    ```bash
    cd "PCCE Hackathon/pedhi"
@@ -70,12 +72,12 @@ Everything on my side is done. These are the only steps left for you, in order. 
    ```bash
    npm test
    ```
-   It should end with `pass 21` and `fail 0`.
+   It should end with `pass 32` and `fail 0`.
 
 ### Step 2. Add the AI key (5 minutes, recommended)
 Without a key everything works on the rule engine. With it, the brief reads naturally in Hindi, Ask Pedhi answers any question, and voice/WhatsApp understand looser sentences.
 1. Get an API key from https://console.anthropic.com (Settings → API keys). Add a small amount of credit.
-2. In the `pedhi` folder create a file named `.env.local` containing one line:
+2. Open the file `pedhi/.env.local` (already created on this Mac, with the secret words filled in; on another laptop copy `pedhi/.env.example` to `.env.local`). Paste your key after the `=` on this line:
    ```bash
    ANTHROPIC_API_KEY=paste-your-key-here
    ```
@@ -112,25 +114,26 @@ Follow `tally-test-pack/HOW-TO-TEST-IN-TALLY.md`. If the Trial Balance matches, 
    ```bash
    WHATSAPP_TOKEN=...
    WHATSAPP_PHONE_NUMBER_ID=...
-   WHATSAPP_VERIFY_TOKEN=any-secret-word-you-choose
+   WHATSAPP_APP_SECRET=...   (Meta → App settings → Basic → App secret)
    ```
-4. In Meta → WhatsApp → Configuration → Webhook: URL `https://<your-tunnel-link>/api/whatsapp`, verify token = the same secret word; subscribe to **messages**.
-5. In `pedhi/lib/seed.ts`, change one user's phone (for example Raju, `919822000004`) to your number with country code (91 + 10 digits), then **Reset demo data**.
+   `WHATSAPP_VERIFY_TOKEN` is already filled in `.env.local`.
+4. In Meta → WhatsApp → Configuration → Webhook: URL `https://<your-tunnel-link>/api/whatsapp`, verify token = the `WHATSAPP_VERIFY_TOKEN` value from `.env.local`; subscribe to **messages**. Pedhi checks Meta's signature on every message with the app secret, so fake messages are rejected.
+5. Sign in as the owner → **WhatsApp** → **WhatsApp numbers** card: type your phone number next to Raju (or anyone) and press Save. No code change needed.
 6. Send "hi" from your phone to the test number. Note: the temporary token expires in 24 hours.
 
 ### Step 7 (optional). A permanent public link (Vercel + Turso, free tiers)
-1. Push the `pedhi` folder to a GitHub repository (I can do the commit for you; just say so).
+1. The code is already on GitHub: https://github.com/Sai03SkAr/Pcce-Hack-2026. In Vercel set the **Root Directory** to `pedhi`.
 2. Create a free database at https://turso.tech, and copy its URL and token.
 3. Import the repo at https://vercel.com, and set environment variables `DATABASE_URL`, `DATABASE_AUTH_TOKEN` (and `ANTHROPIC_API_KEY` if you have one).
 4. Deploy. The first visit fills the database with the demo story. Install the app on phones from this link; it never changes.
 
 ### Step 7b (optional). Automatic reminders that send themselves
-Once deployed on Vercel (Step 7) with real WhatsApp (Step 6): add an environment variable `CRON_SECRET` (any long random word). `vercel.json` already runs the reminder job every morning at 10:00 IST. Then the owner switches on **Udhaar → Automatic reminders**. Until then, **Send today's now** prepares the messages for you to send.
+Once deployed on Vercel (Step 7) with real WhatsApp (Step 6): add an environment variable `CRON_SECRET` (copy the value already generated in `pedhi/.env.local`). `vercel.json` already runs the reminder job every morning at 10:00 IST. Then the owner switches on **Udhaar → Automatic reminders**. Until then, **Send today's now** prepares the messages for you to send.
 
 ### Step 8 (before any real business uses it, not for the hackathon)
 - A CA reviews the ledger and GST rules (ask them to check `TALLY_RESEARCH_AND_ACCOUNTING_PLAN.md` section 3).
 - Take a backup every week: **Books → CA pack → Download backup**.
-- Replace the demo persona login with OTP login, add the WhatsApp signature check, and set up daily database backups.
+- Replace the demo persona login with OTP login, set `WHATSAPP_APP_SECRET` (the signature check refuses unsigned messages in production), and set up daily database backups.
 
 ---
 
@@ -225,6 +228,12 @@ Status: ✅ built and tested · ⚙️ works, needs a key or setup for the full 
 | Transfer between branches, correct a count (with reason), record a supplier bill | ✅ |
 | Everyone can see other branches' stock; only their own branch is changeable | ✅ |
 | New item: name, unit, prices, GST rate, HSN, other names for voice/WhatsApp; stock then arrives through a purchase | ✅ |
+| Typing an item that isn't in the list while recording a purchase offers **Add as new item**, then it comes in on the same bill | ✅ |
+| **Use-before date** on each purchase line (cement, paint, putty, adhesive); also "exp 03/2027" on WhatsApp | ✅ |
+| **Stock plan**: Order now (what runs out before delivery, how much to order, grouped by supplier, ready WhatsApp order message, one tap to record the bill when it arrives) | ✅ |
+| **Expiring in 30 days** (what is still on the shelf, oldest sells first); alerts on Today, a line in every morning brief, red 7 days before | ✅ |
+| **What sells, what earns**: per item sales, profit, margin, demand rising or falling, days of stock; Stars, Crowd-pullers, Push it, Not moving | ✅ |
+| **Live**: every open screen refreshes itself when anyone at any branch saves a bill, payment or delivery (green Live dot) | ✅ |
 
 ### Udhaar (customers)
 | Feature | Status |
@@ -280,7 +289,8 @@ Status: ✅ built and tested · ⚙️ works, needs a key or setup for the full 
 | Feature | Status |
 |---|---|
 | Questions in English, Hindi or Hinglish, typed or spoken | ✅ |
-| Answers from 8 typed data tools (sales, trend, branches, top items, stock, udhaar, customer, issues); never invents a number | ✅ |
+| Answers from 11 typed data tools (sales, trend, branches, top items, stock, udhaar, customer, issues, expiring stock, what to order, item demand and profit); never invents a number | ✅ |
+| "Kya expire hone wala hai?", "What should I order?", "Which items have rising demand?" | ✅ |
 | "How this was calculated": the exact query and data behind the answer | ✅ |
 | Staff never see cost or margin here either; branch staff only get their branch | ✅ |
 | Any free-form question | ⚙️ AI key (without it, common questions are answered by rules) |
@@ -290,6 +300,12 @@ Status: ✅ built and tested · ⚙️ works, needs a key or setup for the full 
 |---|---|
 | Working chat simulator for every person | ✅ |
 | Sales, payments, questions, "undo", "brief" by message, in Hinglish | ✅ |
+| **Approval first**: Pedhi replies with what it understood; nothing is saved until the sender replies YES (NO cancels, stale after 30 minutes) | ✅ |
+| **Stock arrived**: "50 bori ACC cement aaya exp 03/2027" becomes a proper supplier bill (stock, GST credit, supplier owed) after YES | ✅ |
+| **New item?** Pedhi asks before adding it ("YES 395 355" = selling and buying price), copying GST and unit from a similar item; staff cannot add items | ✅ |
+| Credit limit checked before asking for YES | ✅ |
+| The family sets each person's WhatsApp number on the WhatsApp screen | ✅ |
+| Meta signature check (`WHATSAPP_APP_SECRET`) on the real webhook | ✅ |
 | Send the 7 am brief to any family member | ✅ |
 | Only registered numbers can record anything; all business rules apply | ✅ |
 | Real WhatsApp via Meta's Cloud API (same code) | ⚙️ needs Meta setup |
@@ -339,7 +355,7 @@ Status: ✅ built and tested · ⚙️ works, needs a key or setup for the full 
 
 ## 7. What was tested
 
-**30 automated tests** (`npm test`), all passing:
+**32 automated tests** (`npm test`), all passing:
 1. Stock always equals the sum of its movements
 2. The insight engine finds every planted story, ranked correctly, with no false alarms
 3. Udhaar ageing applies payments to the oldest bills first
@@ -347,7 +363,7 @@ Status: ✅ built and tested · ⚙️ works, needs a key or setup for the full 
 5. Trust rules: branch walls, credit limits, stock limits, staff price edits ignored
 6. The suggested transfer clears the stock-out
 7. The message parser reads Hinglish sales and payments
-8. A WhatsApp message becomes a bill, and UNDO takes it back
+8. A WhatsApp message is shown back first, saved only on YES (NO saves nothing), and UNDO takes it back
 9. Ask answers match the metrics layer; staff never see margin
 10. Every voucher balances; Trial Balance and Balance Sheet tie out; every bill has its voucher
 11. A udhaar bill debits the customer and splits GST exactly
@@ -370,8 +386,12 @@ Status: ✅ built and tested · ⚙️ works, needs a key or setup for the full 
 28. Customer import with old balances from a Khatabook-style file
 29. Automatic reminders go to overdue customers once per cycle
 30. The help guide covers the khata and Tally features
+31. New goods on WhatsApp: Pedhi asks before adding the item, copies GST and unit from a similar item, books a balanced purchase voucher with the expiry date; staff are told to ask a manager
+32. Stock plan: expiry dates parse, the planted expiring lot reaches the insights and the brief, reorder lines are positive and grouped by supplier, every rupee of 30-day sales lands on one item, Ask answers expiry and ordering, staff never see profit per item
 
 **Also checked by hand in the browser:** adding a customer from the bill, Day close with a ₹500 shortage, the New item form; all 22 screens at phone width (none wider than the screen), desktop, dark mode, all roles; bill by voice-style sentence, invoice totals, WhatsApp billing, transfer fix, reminders, Ask with evidence, expense and purchase in Books, P&L, Balance Sheet, GST, CA sign-off, Tally XML well-formed (6,424 vouchers balanced), help guide, install manifest and icons, production build.
+
+**Also checked in the browser (14 Nov):** Stock plan at desktop and phone width; adding a new item from the purchase form on a phone; the WhatsApp new-item and stock-in flow end to end; a second open tab updating by itself after a WhatsApp sale (Live).
 
 **Not verified yet:** importing the Tally files into a real TallyPrime; a CA's review of the GST and ledger rules; the real WhatsApp API (simulator only); the AI-key paths (written and wired, but no key was available here).
 

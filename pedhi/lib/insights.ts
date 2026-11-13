@@ -2,6 +2,7 @@
 import { q, tx } from './db'
 import { addDays, daysBetween, fmtDay, inr, inrShort, today, weekdayName } from './format'
 import { cashVariances, receivables, salesByDay, stockStatus, weekdayBaseline, type Scope } from './metrics'
+import { expiring } from './stockplan'
 
 export type Action =
   | { kind: 'transfer'; item_id: number; from: number; to: number; qty: number; label_en: string; label_hi: string }
@@ -91,6 +92,26 @@ export async function computeInsights(orgId: number): Promise<Insight[]> {
       detail_en: `${r.qty} ${r.unit} sitting at ${r.branch}. Consider a discount, a bundle with primer, or returning it to the supplier.`,
       detail_hi: `${r.branch} mein ${r.qty} ${r.unit} pada hai. Discount do, primer ke saath bundle karo, ya supplier ko wapas karo.`,
       action: { kind: 'view', href: '/inventory?f=dead', label_en: 'See dead stock', label_hi: 'Dead stock dekho' },
+    })
+  }
+
+  // Expiring stock: one line per item and branch, the soonest delivery first
+  const seen = new Set<string>()
+  for (const x of await expiring({ orgId }, 30)) {
+    const k = `${x.branch_id}:${x.item_id}`
+    if (seen.has(k)) continue
+    seen.add(k)
+    const gone = x.days_left < 0
+    const whenEn = gone ? `expired ${-x.days_left} days ago` : x.days_left === 0 ? 'expires today' : `expires in ${x.days_left} days`
+    const whenHi = gone ? `${-x.days_left} din pehle expire ho gaya` : x.days_left === 0 ? 'aaj expire hoga' : `${x.days_left} din mein expire hoga`
+    out.push({
+      key: `exp:${k}:${x.expiry}`, type: 'expiry', severity: x.days_left <= 7 ? 'high' : 'med', branch_id: x.branch_id, impact: x.value,
+      title_en: `${x.qty} ${x.unit} ${x.name} at ${x.branch} ${whenEn}`, title_hi: `${x.branch} mein ${x.qty} ${x.unit} ${x.name} ${whenHi}`,
+      detail_en: gone ? `${inr(x.value)} of stock. Keep it off the counter and ask the supplier about a return.`
+        : `${inr(x.value)} of stock, use-by ${fmtDay(x.expiry)}. Sell it first: offer it on the next site orders or move it to the busiest branch.`,
+      detail_hi: gone ? `${inr(x.value)} ka maal. Counter se hatao aur supplier se return ki baat karo.`
+        : `${inr(x.value)} ka maal, ${fmtDay(x.expiry)} tak. Pehle yahi becho: agle site order mein do ya sabse busy branch mein bhejo.`,
+      action: { kind: 'view', href: '/inventory/plan#expiry', label_en: 'See expiring stock', label_hi: 'Expiry wala maal dekho' },
     })
   }
 
