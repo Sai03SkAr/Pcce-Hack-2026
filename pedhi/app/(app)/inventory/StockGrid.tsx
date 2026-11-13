@@ -138,7 +138,7 @@ function StockPanel({ row, all, branches, canManage, canPurchase, onClose }: {
   const tabs = [canPurchase && ['purchase', 'Stock received', PackagePlus], canManage && ['transfer', 'Transfer in', ArrowRightLeft], canManage && ['adjust', 'Correct count', Pencil]].filter(Boolean) as [typeof tab, string, typeof X][]
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-ink/30 backdrop-blur-[2px]" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex justify-end bg-black/45 backdrop-blur-[2px]" onClick={onClose}>
       <aside role="dialog" aria-modal="true" aria-label={row.name} className="h-full w-full max-w-md overflow-auto bg-card p-5 shadow-[var(--shadow-lg)] rise" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-start gap-2"><div><p className="eyebrow">{row.branch}</p><h2 className="display text-[22px] font-semibold leading-tight">{row.name}</h2></div>
           <button className="btn btn-ghost btn-sm ml-auto" onClick={onClose} aria-label="Close"><X className="size-4" /></button></div>

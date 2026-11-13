@@ -43,7 +43,7 @@ export function Importer({ branches, defaultBranch, ai }: { branches: { id: numb
           <div className="card flex flex-col p-4">
             <label htmlFor="paste" className="text-[13px] font-semibold">Or paste cells from Excel / Google Sheets</label>
             <textarea id="paste" value={text} onChange={(e) => setText(e.target.value)} rows={6} className="input mt-2 flex-1 font-mono text-[12px]" placeholder={'Item\tRate\tStock\nACC Cement\t410\t140'} />
-            <div className="mt-3 flex gap-2">
+            <div className="mt-3 flex flex-wrap gap-2">
               <button className="btn btn-primary" disabled={pending || !text.trim()} onClick={() => preview(text)}>{pending ? 'Reading…' : 'Read sheet'}</button>
               <button className="btn" disabled={pending} onClick={async () => { const t = await (await fetch('/sample-stock-sheet.csv')).text(); setText(t); preview(t) }}><FileSpreadsheet className="size-4" />Try a messy sample</button>
             </div>

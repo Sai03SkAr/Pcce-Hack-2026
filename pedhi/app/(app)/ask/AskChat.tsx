@@ -48,7 +48,7 @@ export function AskChat({ name, suggestions, ai, lang }: { name: string; suggest
           <span className="grid size-12 place-items-center rounded-[14px] bg-bahi text-[#fff6e6]"><Sparkles className="size-6" /></span>
           <h1 className="display mt-4 text-[34px] font-semibold leading-tight">{lang === 'hi' ? `Poochhiye, ${name} ji.` : `Ask your business, ${name}.`}</h1>
           <p className="mt-2 max-w-lg text-[15px] text-ink-2">Hindi, English or Hinglish, typed or spoken. Every number comes from your books, and you can open the query behind it.</p>
-          <div className="mt-6 flex flex-wrap gap-2">{suggestions.map((s) => <button key={s} onClick={() => send(s)} className="btn rounded-full text-[13.5px] font-medium">{s}</button>)}</div>
+          <div className="mt-6 flex flex-wrap gap-2">{suggestions.map((s) => <button key={s} onClick={() => send(s)} className="btn h-auto min-h-9 whitespace-normal rounded-full py-1.5 text-left text-[13.5px] font-medium">{s}</button>)}</div>
           {!ai && <p className="mt-6 text-[12.5px] text-muted">No AI key is set, so answers come from the built-in rule engine. Add ANTHROPIC_API_KEY for free-form questions.</p>}
         </div>
       )}

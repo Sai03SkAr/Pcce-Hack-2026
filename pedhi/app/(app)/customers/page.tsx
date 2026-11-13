@@ -65,7 +65,7 @@ export default async function Customers({ searchParams }: PageProps<'/customers'
           <li key={r.customer_id} className="flex items-center gap-3 px-4 py-3">
             <Link href={`/customers/${r.customer_id}`} className="min-w-0 flex-1">
               <div className="truncate text-[14.5px] font-semibold">{r.name}</div>
-              <div className="flex items-center gap-1.5 text-[12.5px] text-muted">{r.branch}
+              <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[12.5px] text-muted">{r.branch}
                 {r.outstanding > 0 && <span className={`chip ${r.oldest_days > r.credit_days + 15 ? 'chip-red' : r.overdue > 0 ? 'chip-amber' : 'chip-grey'} num`}>{r.oldest_days} days</span>}
                 {r.outstanding > r.credit_limit && <span className="chip chip-red">over limit</span>}</div>
             </Link>

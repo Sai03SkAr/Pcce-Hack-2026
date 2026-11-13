@@ -18,8 +18,8 @@ export default async function Gst({ searchParams }: PageProps<'/books/gst'>) {
       <div className="flex flex-wrap items-end gap-3">
         <div><h1 className="display text-[26px] font-semibold">GST for {label(month)}</h1>
           <p className="text-[13.5px] text-muted">Prepared from your bills and purchases. File GSTR-1 by {fmtDay(next.slice(0, 8) + '11')} and GSTR-3B by {fmtDay(next.slice(0, 8) + '20')} on the GST portal (monthly filers), or let your CA file.</p></div>
-        <form className="ml-auto flex gap-2 print:hidden">
-          <select name="m" defaultValue={month} className="input h-9 w-auto">{months.map((m) => <option key={m} value={m}>{label(m)}</option>)}</select>
+        <form className="flex w-full gap-2 sm:ml-auto sm:w-auto print:hidden">
+          <select name="m" defaultValue={month} className="input h-9 min-w-0 flex-1 sm:w-auto sm:flex-none">{months.map((m) => <option key={m} value={m}>{label(m)}</option>)}</select>
           <button className="btn btn-sm h-9">Show</button><PrintButton />
         </form>
       </div>

@@ -10,11 +10,12 @@ export function Logo({ size = 32 }: { size?: number }) {
   )
 }
 
-export function Wordmark() {
+export function Wordmark({ compact }: { compact?: boolean }) {
   return (
-    <span className="flex items-center gap-2.5">
+    <span className="flex items-center gap-2.5" aria-label="Pedhi">
       <Logo />
-      <span className="display text-[22px] font-semibold leading-none">Pedhi</span>
+      {/* compact: on narrow phones the header needs the room for the branch and language pickers */}
+      <span className={`display text-[22px] font-semibold leading-none ${compact ? 'max-[400px]:hidden' : ''}`}>Pedhi</span>
     </span>
   )
 }

@@ -105,10 +105,10 @@ export default async function Books() {
               <summary className="flex cursor-pointer list-none flex-wrap items-center gap-x-3 gap-y-1">
                 <span className="w-16 text-[12.5px] text-muted num">{fmtDay(v.day)}</span>
                 <span className="chip chip-grey">{v.type}</span>
-                <span className="min-w-0 flex-1 truncate text-[14px]">{v.narration}</span>
+                <span className="order-last min-w-0 basis-full truncate text-[13.5px] text-ink-2 sm:order-none sm:flex-1 sm:basis-0 sm:text-[14px] sm:text-ink">{v.narration}</span>
                 {v.branch && <span className="hidden text-[12px] text-muted sm:inline"><Building2 className="mr-1 inline size-3" />{v.branch}</span>}
-                <span className="num text-[14px] font-semibold">{inr(v.amount)}</span>
-                <span className="text-[12px] text-gold group-open:hidden">Tally view</span>
+                <span className="num ml-auto text-[14px] font-semibold sm:ml-0">{inr(v.amount)}</span>
+                <span className="hidden text-[12px] text-gold group-open:hidden sm:inline">Tally view</span>
               </summary>
               <div className="mt-3 rounded-[10px] bg-paper-2/60 p-3"><VoucherView v={v} compact /></div>
             </details>

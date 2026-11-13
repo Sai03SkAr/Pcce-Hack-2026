@@ -18,7 +18,7 @@ export function ShareStatement({ customerId, phone, name, balance }: { customerI
     <>
       <button className="btn btn-sm" disabled={pending} onClick={() => get()}><Share2 className="size-3.5" />Share khata</button>
       {(url || err) && (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-ink/40 p-4" onClick={() => { setUrl(null); setErr('') }}>
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/45 p-4" onClick={() => { setUrl(null); setErr('') }}>
           <div role="dialog" aria-modal="true" aria-label="Share khata" className="card rise w-full max-w-md space-y-3 p-5" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center"><h2 className="display text-xl font-semibold">Share khata with {name.split(' ')[0]}</h2>
               <button className="btn btn-ghost btn-sm ml-auto" onClick={() => { setUrl(null); setErr('') }} aria-label="Close"><X className="size-4" /></button></div>

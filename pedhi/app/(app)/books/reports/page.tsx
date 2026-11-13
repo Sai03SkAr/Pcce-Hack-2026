@@ -19,16 +19,16 @@ export default async function Reports({ searchParams }: PageProps<'/books/report
   const to = typeof sp.to === 'string' ? sp.to : today(), from = typeof sp.from === 'string' ? sp.from : start
   const branches = await q<{ id: number; name: string }>('SELECT id, name FROM branches WHERE org_id=? ORDER BY id', [u.org_id])
   const branch = u.branch_id ?? (Number(sp.branch) || null)
-  const tab = (k: string, l: string) => <Link href={`/books/reports?r=${k}`} className={`rounded-[8px] px-3 py-1.5 ${r === k ? 'bg-ink text-paper' : 'text-muted'}`}>{l}</Link>
+  const tab = (k: string, l: string) => <Link href={`/books/reports?r=${k}`} className={`whitespace-nowrap rounded-[8px] px-2 py-1.5 text-center sm:px-3 ${r === k ? 'bg-ink text-paper' : 'text-muted'}`}>{l}</Link>
 
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-end gap-3">
         <h1 className="display text-[26px] font-semibold">{r === 'pl' ? 'Profit & Loss' : r === 'bs' ? 'Balance Sheet' : 'Trial Balance'}</h1>
-        <div className="ml-auto flex rounded-[10px] border border-line-2 bg-card p-0.5 text-[13px] font-semibold print:hidden">{tab('pl', 'Profit & Loss')}{tab('bs', 'Balance Sheet')}{tab('tb', 'Trial Balance')}</div>
+        <div className="grid w-full grid-cols-3 rounded-[10px] border border-line-2 bg-card p-0.5 text-[13px] font-semibold sm:ml-auto sm:flex sm:w-auto print:hidden">{tab('pl', 'P & L')}{tab('bs', 'Balance Sheet')}{tab('tb', 'Trial Balance')}</div>
       </div>
       <RangeForm from={r === 'pl' ? from : undefined} to={to} extra={{ r }} csv={`/api/export?kind=${r}&from=${from}&to=${to}${branch ? `&branch=${branch}` : ''}`}>
-        {r === 'pl' && !u.branch_id && <label className="text-[12.5px] font-medium text-ink-2">Branch<select name="branch" defaultValue={branch ?? ''} className="input mt-1 h-9 w-auto"><option value="">Whole business</option>{branches.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}</select></label>}
+        {r === 'pl' && !u.branch_id && <label className="text-[12.5px] font-medium text-ink-2">Branch<select name="branch" defaultValue={branch ?? ''} className="input mt-1 h-10 sm:h-9 sm:w-auto"><option value="">Whole business</option>{branches.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}</select></label>}
       </RangeForm>
       {r === 'pl' && <PL orgId={u.org_id} from={from} to={to} branch={branch} branchName={branches.find((b) => b.id === branch)?.name} />}
       {r === 'bs' && <BS orgId={u.org_id} to={to} />}

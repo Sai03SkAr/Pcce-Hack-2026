@@ -24,10 +24,10 @@ export default async function CaPack({ searchParams }: PageProps<'/books/ca'>) {
       <div><h1 className="display text-[26px] font-semibold">CA pack</h1>
         <p className="max-w-2xl text-[13.5px] text-muted">Everything your chartered accountant needs to review the books and file returns. No re-typing from WhatsApp photos. Your CA can also log in to Pedhi with a read-only CA account.</p></div>
 
-      <form className="flex flex-wrap items-end gap-2">
-        <label className="text-[12.5px] font-medium text-ink-2">From<input type="date" name="from" defaultValue={from} className="input mt-1 h-9 w-auto" /></label>
-        <label className="text-[12.5px] font-medium text-ink-2">To<input type="date" name="to" defaultValue={to} className="input mt-1 h-9 w-auto" /></label>
-        <button className="btn btn-sm h-9">Set period</button>
+      <form className="grid grid-cols-2 items-end gap-2 sm:flex sm:flex-wrap">
+        <label className="text-[12.5px] font-medium text-ink-2">From<input type="date" name="from" defaultValue={from} className="input mt-1 h-10 sm:h-9 sm:w-auto" /></label>
+        <label className="text-[12.5px] font-medium text-ink-2">To<input type="date" name="to" defaultValue={to} className="input mt-1 h-10 sm:h-9 sm:w-auto" /></label>
+        <button className="btn btn-sm col-span-2 h-9">Set period</button>
       </form>
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">

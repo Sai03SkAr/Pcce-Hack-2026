@@ -18,6 +18,11 @@ export function HelpWidget() {
   const [pending, start] = useTransition()
   const end = useRef<HTMLDivElement>(null)
   useEffect(() => { end.current?.scrollIntoView({ block: 'end' }) }, [msgs, pending])
+  useEffect(() => {
+    const show = () => setOpen(true)
+    window.addEventListener('pedhi:help', show)
+    return () => window.removeEventListener('pedhi:help', show)
+  }, [])
   const base = '/' + (path.split('/')[1] ?? '')
   const suggestions = HELP_SUGGESTIONS[base] ?? HELP_SUGGESTIONS.default
 
@@ -31,19 +36,19 @@ export function HelpWidget() {
     })
   }
 
-  if (path.startsWith('/ask') || path.startsWith('/whatsapp')) return null // these screens are chats already; the button would cover Send
-  const lift = path.startsWith('/bill') ? 'bottom-[140px]' : 'bottom-20' // stay clear of the bill's cart bar on phones
+  const chat = path.startsWith('/ask') || path.startsWith('/whatsapp') // chat screens: the button would cover Send
   return (
     <>
-      <button onClick={() => setOpen(!open)} aria-expanded={open} aria-label="Help"
-        className={`fixed ${lift} right-4 z-40 flex h-12 items-center gap-2 rounded-full bg-ink px-4 text-[14px] font-semibold text-paper shadow-[var(--shadow-lg)] transition hover:scale-[1.03] lg:bottom-6 lg:right-6 print:hidden`}>
-        {open ? <X className="size-5" /> : <LifeBuoy className="size-5" />}<span className="hidden sm:inline">{open ? 'Close' : 'Help'}</span>
-      </button>
+      {!chat && <button onClick={() => setOpen(!open)} aria-expanded={open} aria-label="Help"
+        className="fixed bottom-6 right-6 z-40 hidden h-12 items-center gap-2 rounded-full bg-ink px-4 text-[14px] font-semibold text-paper shadow-[var(--shadow-lg)] transition hover:scale-[1.03] lg:flex print:hidden">
+        {open ? <X className="size-5" /> : <LifeBuoy className="size-5" />}<span>{open ? 'Close' : 'Help'}</span>
+      </button>}
       {open && (
-        <section role="dialog" aria-label="Pedhi guide" className="card rise fixed inset-x-3 bottom-36 z-40 flex max-h-[70dvh] flex-col overflow-hidden shadow-[var(--shadow-lg)] sm:inset-x-auto sm:right-6 sm:w-[400px] lg:bottom-24 print:hidden">
+        <section role="dialog" aria-label="Pedhi guide" className="card rise fixed inset-x-3 bottom-[calc(76px+env(safe-area-inset-bottom))] z-50 flex max-h-[70dvh] flex-col overflow-hidden shadow-[var(--shadow-lg)] sm:inset-x-auto sm:right-6 sm:w-[400px] lg:bottom-24 print:hidden">
           <header className="flex items-center gap-2.5 border-b border-line bg-paper-2/60 px-4 py-3">
             <span className="grid size-8 place-items-center rounded-full bg-gold-soft text-gold"><BookOpen className="size-4" /></span>
-            <div className="leading-tight"><div className="text-[14px] font-semibold">Pedhi guide</div><div className="text-[12px] text-muted">How to do anything in the app. Hindi or English.</div></div>
+            <div className="min-w-0 flex-1 leading-tight"><div className="text-[14px] font-semibold">Pedhi guide</div><div className="text-[12px] text-muted">How to do anything in the app. Hindi or English.</div></div>
+            <button onClick={() => setOpen(false)} className="btn btn-ghost btn-sm lg:hidden" aria-label="Close guide"><X className="size-4" /></button>
           </header>
           <div className="flex-1 space-y-3 overflow-y-auto p-4">
             {!msgs.length && (

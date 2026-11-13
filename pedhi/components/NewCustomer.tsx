@@ -24,7 +24,7 @@ export function NewCustomerDialog({ initialName = '', branches, defaultBranch, c
     onCreated(r.data as NewCust)
   })
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-ink/40 p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-50 grid place-items-center bg-black/45 p-4" onClick={onClose}>
       <form role="dialog" aria-modal="true" aria-label="New customer" className="card rise w-full max-w-sm space-y-3 p-5" onClick={(e) => e.stopPropagation()}
         onSubmit={(e) => { e.preventDefault(); save() }}>
         <div className="flex items-center"><h2 className="display text-xl font-semibold">New customer</h2>

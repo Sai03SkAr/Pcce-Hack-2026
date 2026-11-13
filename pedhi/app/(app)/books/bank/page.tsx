@@ -33,8 +33,8 @@ export default async function Bank({ searchParams }: PageProps<'/books/bank'>) {
               {r.open.slice(0, 60).map((x) => (
                 <li key={x.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2.5 text-[13.5px]">
                   <span className="w-14 text-muted num">{fmtDay(x.day)}</span>
-                  <span className="min-w-0 flex-1 truncate">{x.narration}</span>
-                  <span className={`num font-semibold ${x.amount > 0 ? 'text-leaf' : ''}`}>{x.amount > 0 ? '+' : '−'}{inr(Math.abs(x.amount))}</span>
+                  <span className="order-1 min-w-0 basis-full truncate text-ink-2 sm:order-none sm:flex-1 sm:basis-0 sm:text-ink">{x.narration}</span>
+                  <span className={`num ml-auto font-semibold sm:ml-0 ${x.amount > 0 ? 'text-leaf' : ''}`}>{x.amount > 0 ? '+' : '−'}{inr(Math.abs(x.amount))}</span>
                   {canEdit && <ClearLine id={x.id} day={x.day} />}
                 </li>
               ))}
@@ -45,8 +45,8 @@ export default async function Bank({ searchParams }: PageProps<'/books/bank'>) {
             <section>
               <h2 className="mb-2 font-semibold">Recently matched</h2>
               <ul className="card divide-y divide-line text-[13px]">
-                {r.cleared.map((x) => <li key={x.id} className="flex items-center gap-3 px-4 py-2"><span className="w-28 text-muted num">bank {fmtDay(x.bank_date)}</span><span className="min-w-0 flex-1 truncate">{x.narration}</span>
-                  <span className="num">{inr(Math.abs(x.amount))}</span>{canEdit && <ClearLine id={x.id} day={x.day} cleared />}</li>)}
+                {r.cleared.map((x) => <li key={x.id} className="flex flex-wrap items-center gap-x-3 gap-y-0.5 px-4 py-2"><span className="text-muted num sm:w-28">bank {fmtDay(x.bank_date)}</span><span className="order-last min-w-0 basis-full truncate text-ink-2 sm:order-none sm:flex-1 sm:basis-0 sm:text-ink">{x.narration}</span>
+                  <span className="num ml-auto sm:ml-0">{inr(Math.abs(x.amount))}</span>{canEdit && <ClearLine id={x.id} day={x.day} cleared />}</li>)}
               </ul>
             </section>
           )}

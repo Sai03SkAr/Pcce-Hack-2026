@@ -74,7 +74,7 @@ export default async function Today() {
           <BriefCard body={brief.body} source={brief.source} lang={lang} />
         </div>
         <div>
-          <div className="mb-2.5 flex items-baseline"><h2 className="display text-[22px] font-semibold">{t('Needs attention', 'Dhyan dein')}</h2><span className="ml-auto text-[13px] text-muted">{t('ranked by rupees at stake', 'paise ke hisaab se')}</span></div>
+          <div className="mb-2.5 flex flex-wrap items-baseline gap-x-3"><h2 className="display text-[22px] font-semibold">{t('Needs attention', 'Dhyan dein')}</h2><span className="text-[13px] text-muted sm:ml-auto">{t('ranked by rupees at stake', 'paise ke hisaab se')}</span></div>
           <InsightList items={insights} lang={lang} canAct />
         </div>
       </section>

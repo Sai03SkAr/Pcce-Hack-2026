@@ -84,7 +84,7 @@ export function JournalForm({ ledgers: l0, groups, today }: { ledgers: Led[]; gr
       </div>
 
       {newLed && (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-ink/40 p-4" onClick={() => setNewLed(null)}>
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/45 p-4" onClick={() => setNewLed(null)}>
           <form role="dialog" aria-modal="true" aria-label="New ledger" className="card rise w-full max-w-sm space-y-3 p-5" onClick={(e) => e.stopPropagation()}
             onSubmit={(e) => { e.preventDefault(); start(async () => {
               const r = await bookCreateLedger(newLed.name, newLed.grp)

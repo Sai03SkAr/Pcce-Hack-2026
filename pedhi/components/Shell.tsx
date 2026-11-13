@@ -2,7 +2,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState, useTransition } from 'react'
-import { BookOpenText, Boxes, Calculator, Landmark, Building2, ChevronDown, Menu, X, History, LogOut, MessageCircle, ReceiptIndianRupee, RotateCcw, Sparkles, Sun, Upload, Users } from 'lucide-react'
+import { BookOpenText, Boxes, Calculator, Landmark, Building2, ChevronDown, LifeBuoy, Menu, X, History, LogOut, MessageCircle, ReceiptIndianRupee, RotateCcw, Sparkles, Sun, Upload, Users } from 'lucide-react'
 import { logout, resetDemo, setBranch, setLang } from '@/app/actions'
 import { Wordmark } from './Logo'
 import { HelpWidget } from './HelpWidget'
@@ -46,7 +46,7 @@ export function Shell({ user, branches, branchId, lang, ai, children }: ShellPro
       <Building2 className="pointer-events-none absolute left-2.5 hidden size-4 text-muted sm:block" />
       <select aria-label="Branch" value={branchId ?? ''} disabled={pending}
         onChange={(e) => start(() => setBranch(e.target.value ? +e.target.value : null))}
-        className="input h-9 max-w-[150px] appearance-none pl-3 pr-8 text-[13.5px] font-medium sm:max-w-none sm:pl-8">
+        className="input h-9 w-auto max-w-[min(52vw,190px)] appearance-none pl-3 pr-8 !text-[14px] font-medium sm:max-w-none sm:pl-8">
         <option value="">All branches</option>
         {branches.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
       </select>
@@ -54,10 +54,10 @@ export function Shell({ user, branches, branchId, lang, ai, children }: ShellPro
     </label>
   )
   const langToggle = (
-    <div role="group" aria-label="Language" className="flex h-9 rounded-[9px] border border-line-2 bg-card p-0.5 text-[13px] font-semibold">
+    <div role="group" aria-label="Language" className="flex h-9 shrink-0 rounded-[9px] border border-line-2 bg-card p-0.5 text-[13px] font-semibold">
       {(['en', 'hi'] as const).map((l) => (
         <button key={l} disabled={pending} onClick={() => start(() => setLang(l))} aria-pressed={lang === l}
-          className={`rounded-[7px] px-2.5 transition ${lang === l ? 'bg-ink text-paper' : 'text-muted hover:text-ink'}`}>{l === 'en' ? 'EN' : 'हिं'}</button>
+          className={`rounded-[7px] px-2 transition sm:px-2.5 ${lang === l ? 'bg-ink text-paper' : 'text-muted hover:text-ink'}`}>{l === 'en' ? 'EN' : 'हिं'}</button>
       ))}
     </div>
   )
@@ -99,8 +99,8 @@ export function Shell({ user, branches, branchId, lang, ai, children }: ShellPro
 
       <div className="min-w-0">
         <header className="sticky top-0 z-20 flex items-center gap-2 border-b border-line bg-paper/85 px-4 pb-2.5 pt-[max(0.625rem,env(safe-area-inset-top))] backdrop-blur-md sm:px-6 lg:px-8 print:hidden">
-          <div className="lg:hidden"><Wordmark /></div>
-          <div className="ml-auto flex items-center gap-2">
+          <div className="shrink-0 lg:hidden"><Wordmark compact /></div>
+          <div className="ml-auto flex min-w-0 items-center gap-2">
             <Live />
             {branchPicker}
             {user.branch && <span className="chip chip-gold h-8 px-3 text-[13px]"><Building2 className="size-3.5" />{user.branch}</span>}
@@ -122,7 +122,7 @@ export function Shell({ user, branches, branchId, lang, ai, children }: ShellPro
         </button>
       </nav>
       {more && (
-        <div className="fixed inset-0 z-[45] bg-ink/30 lg:hidden" onClick={() => setMore(false)}>
+        <div className="fixed inset-0 z-[45] bg-black/45 lg:hidden" onClick={() => setMore(false)}>
           <div className="card rise absolute inset-x-2 bottom-[72px] p-2" onClick={(e) => e.stopPropagation()}>
             <div className="grid grid-cols-3 gap-1">
               {nav.filter((n) => !primary.includes(n)).map((n) => (
@@ -131,6 +131,9 @@ export function Shell({ user, branches, branchId, lang, ai, children }: ShellPro
                 </Link>
               ))}
             </div>
+            <button onClick={() => { setMore(false); window.dispatchEvent(new Event('pedhi:help')) }}
+              className="mt-1 flex w-full items-center gap-2 rounded-[10px] px-3 py-2.5 text-left text-[13.5px] font-medium text-ink-2 hover:bg-paper-2">
+              <LifeBuoy className="size-5 text-gold" strokeWidth={1.9} />Help: how do I…?</button>
             <InstallApp className="mt-1 px-1" />
             <div className="mt-1 flex items-center gap-2 border-t border-line px-2 pt-2 text-[13px]">
               <span className="min-w-0 flex-1 truncate text-muted">{user.name}</span>

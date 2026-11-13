@@ -19,8 +19,8 @@ export default async function Activity() {
           <div key={r.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-3 text-[13.5px]">
             <span className="num w-24 shrink-0 text-muted">{fmtDay(r.ts.slice(0, 10))} {r.ts.slice(11, 16)}</span>
             <span className={`chip ${TONE[r.action] ?? 'chip-grey'}`}>{r.action.replace('_', ' ')}</span>
-            <span className="min-w-0 flex-1">{r.detail}</span>
-            <span className="text-muted">{r.user ?? 'System'}</span>
+            <span className="order-last min-w-0 basis-full sm:order-none sm:flex-1 sm:basis-0">{r.detail}</span>
+            <span className="ml-auto text-muted sm:ml-0">{r.user ?? 'System'}</span>
           </div>
         ))}
         {!rows.length && <p className="p-10 text-center text-muted">Nothing yet. Make a bill or send a WhatsApp message and it will show up here.</p>}

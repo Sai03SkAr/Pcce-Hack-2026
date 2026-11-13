@@ -22,7 +22,7 @@ export function ReturnItems({ saleId, lines, hasCustomer, wasCredit }: { saleId:
     <>
       <button className="btn btn-sm" onClick={() => setOpen(true)}><RotateCcw className="size-4" />Return items</button>
       {open && (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-ink/40 p-4" onClick={() => setOpen(false)}>
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/45 p-4" onClick={() => setOpen(false)}>
           <div role="dialog" aria-modal="true" aria-label="Return items" className="card rise max-h-[90dvh] w-full max-w-md overflow-auto p-5" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center"><h2 className="display text-xl font-semibold">Goods returned</h2>
               <button className="btn btn-ghost btn-sm ml-auto" onClick={() => setOpen(false)} aria-label="Close"><X className="size-4" /></button></div>

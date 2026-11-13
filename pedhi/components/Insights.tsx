@@ -60,17 +60,17 @@ export function InsightList({ items, lang, canAct }: { items: Insight[]; lang: '
               <span className={`grid size-9 shrink-0 place-items-center rounded-[10px] ${TONE[i.severity]}`}><Icon className="size-[18px]" strokeWidth={2} /></span>
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-start gap-x-3 gap-y-1">
-                  <h3 className="flex-1 text-[15px] font-semibold leading-snug">{t(i.title_en, i.title_hi)}</h3>
+                  <h3 className="min-w-[min(100%,15rem)] flex-1 text-[15px] font-semibold leading-snug">{t(i.title_en, i.title_hi)}</h3>
                   {i.impact > 0 && <span className={`chip ${i.severity === 'high' ? 'chip-red' : 'chip-amber'} num`}>{fmt(i.impact)} {t('at stake', 'daav par')}</span>}
                 </div>
                 <p className="mt-1 text-[13.5px] leading-relaxed text-ink-2">{t(i.detail_en, i.detail_hi)}</p>
                 <div className="mt-3 flex flex-wrap items-center gap-2">
                   {act(i)}
                   {i.severity !== 'good' && canAct && (
-                    <>
+                    <span className="flex gap-1">{/* kept together so the × never wraps onto a line of its own */}
                       <button onClick={() => run(i, () => setInsightStatus(i.id!, 'done'))} className="btn btn-ghost btn-sm text-muted"><Check className="size-3.5" />{t('Handled', 'Ho gaya')}</button>
                       <button onClick={() => run(i, () => setInsightStatus(i.id!, 'dismissed'))} className="btn btn-ghost btn-sm text-muted" aria-label="Dismiss"><X className="size-3.5" /></button>
-                    </>
+                    </span>
                   )}
                   {msg && msg.id === i.id && <span role="status" className={`text-[13px] ${msg.ok ? 'text-leaf' : 'text-bahi'}`}>{msg.text}</span>}
                 </div>
@@ -95,7 +95,7 @@ export function InsightList({ items, lang, canAct }: { items: Insight[]; lang: '
 export function RemindersDialog({ items, onClose, lang }: { items: Reminder[]; onClose: () => void; lang: 'en' | 'hi' }) {
   const [copied, setCopied] = useState<number | null>(null)
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-ink/40 p-4 backdrop-blur-[2px]" onClick={onClose}>
+    <div className="fixed inset-0 z-50 grid place-items-center bg-black/45 p-4 backdrop-blur-[2px]" onClick={onClose}>
       <div role="dialog" aria-modal="true" aria-label="Payment reminders" className="card rise max-h-[85dvh] w-full max-w-lg overflow-auto p-5" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center"><h2 className="display text-xl font-semibold">{lang === 'hi' ? 'Reminder taiyaar' : 'Reminders ready'}</h2>
           <button className="btn btn-ghost btn-sm ml-auto" onClick={onClose} aria-label="Close"><X className="size-4" /></button></div>

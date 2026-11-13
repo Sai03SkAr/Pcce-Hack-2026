@@ -22,7 +22,7 @@ export function NewItem({ categories, name0 = '', onAdded, label = 'New item' }:
 
   if (!open) return <button type="button" className="btn btn-sm" onClick={() => { setF((x) => ({ ...x, name: name0 })); setOpen(true) }}><PackagePlus className="size-3.5" />{label}</button>
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-ink/40 p-4" onClick={close}>
+    <div className="fixed inset-0 z-50 grid place-items-center bg-black/45 p-4" onClick={close}>
       <div role="dialog" aria-modal="true" aria-label="New item" className="card rise max-h-[90dvh] w-full max-w-md overflow-auto p-5" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center"><h2 className="display text-xl font-semibold">{done ? 'Item added' : 'New item'}</h2>
           <button className="btn btn-ghost btn-sm ml-auto" onClick={close} aria-label="Close"><X className="size-4" /></button></div>
