@@ -1,6 +1,6 @@
 # Pedhi: 3-minute pitch (target 2:45)
 
-About 360 spoken words at a calm pace, which takes about 2:35 to say. That leaves 10 seconds for the demo clicks. Rehearse with a timer twice.
+About 330 spoken words: about 2:20 of talking at a calm pace, plus about 25 seconds of demo clicks, for 2:45 in total. Rehearse with a timer twice.
 
 ## Feature selection
 
