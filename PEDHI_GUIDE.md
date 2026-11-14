@@ -168,7 +168,8 @@ Save, then restart Pedhi. Stop it with Ctrl+C and start it again, or double-clic
 
 **Things to know**
 - The quick tunnel link changes whenever the tunnel restarts, and Cloudflare can drop it after some hours. Each time it changes, paste the new link into the Meta webhook (C2). For a link that never changes, deploy (Step 7) or create a named Cloudflare tunnel.
-- WhatsApp rule: Pedhi can only message your phone within 24 hours of your phone's last message. Send "hi" before the demo so the brief and replies can reach you.
+- **Morning brief:** every day at **7:00 am India time**, Pedhi sends the brief by itself to the owner and family members who have a WhatsApp number. Your number is on Suresh, so it comes to you. It is sent by the running server (or by Vercel Cron once deployed), so the laptop must be on and Pedhi running at 7 am. Send **brief** any time to get it on demand.
+- **WhatsApp's 24-hour rule:** a business can send free-form messages only within 24 hours of the person's last message. With Meta's test number, the 7 am brief only reaches you if you messaged Pedhi in the previous 24 hours, so send "hi" the evening before. A registered business number with an approved "daily brief" message template removes this limit; Meta reviews templates in about a day.
 - The access token from A4 expires in 24 hours. For a permanent one: business.facebook.com → **Settings → Users → System users** → add an Admin system user → **Generate token** for your app with the `whatsapp_business_messaging` and `whatsapp_business_management` permissions. Paste it as `WHATSAPP_TOKEN`.
 - To put the number on someone else (e.g. Raju, to show staff billing): sign in as the owner → **People** → move **+91 93221 06240** to that person. Remove it from Suresh first, since one number can belong to one person only.
 - Without these steps, the **WhatsApp** screen in the app is a full simulator of the same flow, and nothing breaks.

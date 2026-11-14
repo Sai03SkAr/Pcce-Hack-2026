@@ -556,3 +556,18 @@ test('sign-in: each person has their own hashed password, and the cookie cannot 
   assert.equal(await readSession('1'), null, 'a bare id is refused')
   assert.equal(rows[0].phone, '919322106240', 'the demo WhatsApp number belongs to the owner')
 })
+
+test('7 am brief: goes to the owner and family on WhatsApp, once a day', async () => {
+  const { sendMorningBriefs } = await import('../lib/morning')
+  assert.deepEqual(await sendMorningBriefs(), [], 'nothing is sent while WhatsApp is not set up')
+  const env = { ...process.env }, realFetch = globalThis.fetch
+  const sent: string[] = []
+  process.env.WHATSAPP_TOKEN = 'test'; process.env.WHATSAPP_PHONE_NUMBER_ID = 'test'
+  globalThis.fetch = (async (_u: any, init: any) => { sent.push(JSON.parse(init.body).to); return new Response('{}', { status: 200 }) }) as any
+  try {
+    const first = await sendMorningBriefs()
+    assert.deepEqual(first.map((r) => r.name).sort(), ['Anita Naik', 'Suresh Naik'])
+    assert.ok(sent.includes('919322106240'), 'the owner gets it on the demo number')
+    assert.deepEqual(await sendMorningBriefs(), [], 'a second run the same day sends nothing')
+  } finally { process.env = env; globalThis.fetch = realFetch }
+})
