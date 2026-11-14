@@ -4,7 +4,7 @@ import { q } from './db'
 import { addDays, fmtDay, inr, L, today, weekdayName, type Lang } from './format'
 import { getBrief } from './brief'
 import { listInsights } from './insights'
-import { ai, aiEnabled, MAIN, textOf } from './llm'
+import { ai, aiEnabled, groq, groqModel, MAIN, provider, textOf, type GroqMsg } from './llm'
 import { loadCatalogue, parseMessage } from './match'
 import { branchComparison, customerLedger, receivables, salesByDay, salesSummary, stockStatus, topItems, type Scope } from './metrics'
 import { seesMoney, type User } from './session'
@@ -146,16 +146,17 @@ export async function answer(user: User, scope: Scope, question: string): Promis
 async function aiAnswer(ctx: Ctx, question: string): Promise<Answer> {
   const T = today()
   const u = ctx.user
-  const system = `You are Pedhi, the business assistant for ${u.org}, a family-run building materials business in Goa with branches ${ctx.branches.map((b) => b.name).join(', ')}.
+  const system = `You are Pedhi, the business assistant for ${u.org}, a family-run business with branches ${ctx.branches.map((b) => b.name).join(', ')}.
 Today is ${weekdayName(T)} ${T}. You are talking to ${u.name} (${u.title})${u.branch ? `, who only has access to the ${u.branch} branch` : ''}.
 
 Every figure you state must come from a tool result in this conversation. Do not estimate, and do no arithmetic beyond adding or comparing figures the tools returned. If the tools cannot answer the question, say so and say what you can answer instead.
 ${seesMoney(u) ? '' : 'This person is counter staff: cost prices, margins and profit are not available to them. If asked, say those figures are for the owners.\n'}Answer in the language the question was asked in (English, Hindi, or Hinglish in Latin script). Be brief: two to five sentences, the answer first, then the reason if the data shows one. Write rupee amounts the Indian way (₹1,25,000). Plain text, no tables or headings.`
+  const evidence: Evidence[] = []
+  if (provider() === 'groq') return { text: await groqLoop(ctx, system, question, evidence), evidence, source: 'ai' }
   const tools: Anthropic.Tool[] = Object.entries(TOOLS).map(([name, t]) => ({
     name, description: t.description, input_schema: { type: 'object', properties: t.properties, required: t.required ?? [] },
   }))
   const messages: Anthropic.MessageParam[] = [{ role: 'user', content: question }]
-  const evidence: Evidence[] = []
   for (let turn = 0; turn < 6; turn++) {
     const m = await ai().messages.create({ model: MAIN, max_tokens: 4000, system, tools, messages, output_config: { effort: 'low' } })
     if (m.stop_reason === 'refusal') throw new Error('model declined')
@@ -170,6 +171,29 @@ ${seesMoney(u) ? '' : 'This person is counter staff: cost prices, margins and pr
         }
       }))
     messages.push({ role: 'user', content: results })
+  }
+  throw new Error('too many tool turns')
+}
+
+/** The same tool loop on Groq's OpenAI-style API: the model picks tools, our code runs them (with the same role walls). */
+async function groqLoop(ctx: Ctx, system: string, question: string, evidence: Evidence[]) {
+  const tools = Object.entries(TOOLS).map(([name, t]) => ({
+    type: 'function', function: { name, description: t.description, parameters: { type: 'object', properties: t.properties, required: t.required ?? [] } },
+  }))
+  const messages: GroqMsg[] = [{ role: 'system', content: system }, { role: 'user', content: question }]
+  for (let turn = 0; turn < 6; turn++) {
+    const m = await groq({ model: groqModel(MAIN), max_completion_tokens: 4000, messages, tools, tool_choice: 'auto' })
+    if (!m.tool_calls?.length) {
+      if (!m.content?.trim()) throw new Error('empty answer')
+      return m.content.trim()
+    }
+    messages.push({ role: 'assistant', content: m.content ?? '', tool_calls: m.tool_calls })
+    for (const c of m.tool_calls) {
+      let content: string
+      try { content = JSON.stringify(await runTool(ctx, c.function.name, JSON.parse(c.function.arguments || '{}'), evidence)) }
+      catch (e) { content = `Error: ${String(e)}` }
+      messages.push({ role: 'tool', tool_call_id: c.id, content })
+    }
   }
   throw new Error('too many tool turns')
 }

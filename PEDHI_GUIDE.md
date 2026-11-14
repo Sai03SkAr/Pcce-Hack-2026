@@ -107,7 +107,12 @@ After you tap a person on the first screen, Pedhi asks for that person's passwor
 - Passwords are stored scrambled (hashed), and the sign-in cookie is signed, so nobody can edit it to become someone else.
 - These are demo passwords. Change them before any real business uses Pedhi.
 
-### Step 2. Add the AI key (5 minutes, recommended)
+### Step 2. Add the AI key (Claude or Groq)
+**Already done on this Mac:** a free **Groq** key is in `pedhi/.env.local` (`GROQ_API_KEY`), so the AI features run on Groq’s `openai/gpt-oss-120b` (brief, Ask Pedhi) and `openai/gpt-oss-20b` (reading WhatsApp messages, mapping import columns). Tested: the brief comes back in Hinglish with every number intact, Ask Pedhi uses its data tools, staff still can’t see profit, “das bori… udhar pe” becomes a 10-bag udhaar bill.
+- If you later get an Anthropic key, put it in `ANTHROPIC_API_KEY`; Claude is then used instead of Groq.
+- No key at all: everything still works on the rule engine.
+
+#### Getting a Claude key instead (optional) (5 minutes, recommended)
 Without a key everything works on the rule engine. With it, the brief reads naturally in Hindi, Ask Pedhi answers any question, and voice/WhatsApp understand looser sentences.
 1. Get an API key from https://console.anthropic.com (Settings → API keys). Add a small amount of credit.
 2. Open the file `pedhi/.env.local` (already created on this Mac, with the secret words filled in; on another laptop copy `pedhi/.env.example` to `.env.local`). Paste your key after the `=` on this line:

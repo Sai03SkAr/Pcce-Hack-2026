@@ -22,6 +22,7 @@ npm run seed    # reset the demo data (also: "Reset demo data" in the sidebar wh
 
 | Variable | What it turns on |
 |---|---|
+| `GROQ_API_KEY` | Free alternative: the same AI features on Groq (`openai/gpt-oss-120b` and `-20b`, override with `GROQ_MODEL`, `GROQ_FAST_MODEL`). Used when no Anthropic key is set. |
 | `ANTHROPIC_API_KEY` | AI-written brief, free-form "Ask Pedhi", AI message parsing and AI column mapping. Without it every feature runs on the rule engine. |
 | `PEDHI_MODEL`, `PEDHI_FAST_MODEL` | Override the models (defaults `claude-opus-5-5` and `claude-haiku-5-5`). |
 | `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_VERIFY_TOKEN`, `WHATSAPP_APP_SECRET` | Real WhatsApp via Meta's Cloud API. Point the webhook at `/api/whatsapp`; the app secret turns on Meta's signature check. The owner sets each person's number on the WhatsApp screen. |

@@ -67,7 +67,7 @@ export function renderBrief(f: BriefFacts, lang: Lang, u: User) {
 
 const STYLE = {
   en: 'Write in simple Indian English.',
-  hi: 'Write in Hindi in Devanagari script, the way a shop owner texts: keep brand names, item names, branch names and all numbers in Latin script.',
+  hi: 'Write in Hinglish (Hindi in Latin script), the way a Goan shop owner texts, like the draft. Do not switch to English. Keep brand, item and branch names and all numbers exactly as written.',
 }
 
 export async function getBrief(u: User, scope: Scope, lang: Lang, force = false) {
@@ -84,7 +84,7 @@ Rewrite the draft you are given so it reads naturally and warmly, like a trusted
 Rules: use only the facts in the draft. Copy every number, name and date exactly. Add no advice that is not in the draft.
 Keep the same order: greeting, yesterday's numbers, the things needing attention as a numbered list with each suggested action on its own line starting with 👉, the expiring stock line if there is one, then the good news.
 Under 150 words. WhatsApp formatting only (*bold*). At most three emojis. ${STYLE[lang]}`,
-      `Reader: ${u.name} (${u.title}).\n\nDraft:\n${renderBrief(facts, 'en', u)}`, MAIN, 1500)
+      `Reader: ${u.name} (${u.title}).\n\nDraft:\n${renderBrief(facts, lang, u)}`, MAIN, 1500)
     source = 'ai'
   } catch (e) {
     console.error('brief: model call failed, using the rule-built brief', e)
