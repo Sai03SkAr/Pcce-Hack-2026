@@ -1,6 +1,7 @@
 {
   "version": "0.0.1",
   "configurations": [
-    { "name": "pedhi", "runtimeExecutable": "npm", "runtimeArgs": ["--prefix", "pedhi", "run", "dev", "--", "-p", "3100"], "port": 3100 }
+    { "name": "pedhi", "runtimeExecutable": "npm", "runtimeArgs": ["--prefix", "pedhi", "run", "dev", "--", "-p", "3100"], "port": 3100 },
+    { "name": "pedhi-dev", "runtimeExecutable": "npm", "runtimeArgs": ["--prefix", "pedhi", "run", "dev", "--", "-p", "3101"], "port": 3101 }
   ]
 }

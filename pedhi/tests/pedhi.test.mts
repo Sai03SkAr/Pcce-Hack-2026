@@ -539,3 +539,20 @@ test('help guide covers khata and Tally features', async () => {
   assert.equal(top('what should I order from the supplier'), 'stockplan')
   assert.equal(top('naya maal aaya whatsapp pe kaise daale'), 'stockin')
 })
+
+test('sign-in: each person has their own hashed password, and the cookie cannot be edited into someone else', async () => {
+  const { checkPassword, signSession, readSession, hashPassword } = await import('../lib/auth')
+  const { demoPassword } = await import('../lib/seed')
+  const rows = await q<any>('SELECT id, name, pass_hash, phone FROM users ORDER BY id')
+  assert.ok(rows.every((r) => r.pass_hash.startsWith('scrypt$') && !r.pass_hash.includes(demoPassword(r.name))), 'stored hashed, never as text')
+  assert.ok(checkPassword(demoPassword('Suresh Naik'), rows[0].pass_hash))
+  assert.ok(!checkPassword(demoPassword('Raju Gawde'), rows[0].pass_hash), "another person's password doesn't open the owner")
+  assert.ok(!checkPassword('', rows[0].pass_hash) && !checkPassword('x', null))
+  assert.ok(checkPassword('new-secret', hashPassword('new-secret')))
+
+  const t = await signSession(4)
+  assert.equal(await readSession(t), 4)
+  assert.equal(await readSession('1.' + t.split('.')[1]), null, 'changing the id breaks the signature')
+  assert.equal(await readSession('1'), null, 'a bare id is refused')
+  assert.equal(rows[0].phone, '919322106240', 'the demo WhatsApp number belongs to the owner')
+})

@@ -1,5 +1,6 @@
 import type { Transaction } from '@libsql/client'
-import { db, q, tx } from './db'
+import { db, q, run, tx } from './db'
+import { hashPassword } from './auth'
 import { SCHEMA, TABLES } from './schema'
 import { addDays, nowTs, today, weekday } from './format'
 import { seedBooks } from './seedBooks'
@@ -74,9 +75,13 @@ const BRANCHES = [
   { id: 3, name: 'Ponda', code: 'PON', f: 0.5, bills: 15 },
 ]
 
+/** Demo sign-in password: first name + 123, e.g. suresh123 (CA: prakash123). Listed in PEDHI_GUIDE.md; the family changes them under People.
+ *  shortcut: demo-only defaults, replace with passwords people choose before real use. */
+export const demoPassword = (name: string) => name.replace(/^CA /, '').split(' ')[0].toLowerCase() + '123'
+
 // [id, branch, name, role, title, phone, lang]
 const USERS: [number, number | null, string, string, string, string, string][] = [
-  [1, null, 'Suresh Naik', 'owner', 'Owner · founder, 1989', '919822000001', 'hi'],
+  [1, null, 'Suresh Naik', 'owner', 'Owner · founder, 1989', '919322106240', 'hi'], // the demo phone for real WhatsApp
   [2, null, 'Anita Naik', 'family', 'Daughter · finance', '919822000002', 'en'],
   [3, 2, 'Rohan Naik', 'manager', 'Son · runs Mapusa', '919822000003', 'en'],
   [4, 3, 'Raju Gawde', 'staff', 'Counter staff · Ponda', '919822000004', 'hi'],
@@ -271,7 +276,7 @@ export async function seed() {
   await tx(async (t) => {
     await t.execute(`INSERT INTO orgs (id, name, upi_id) VALUES (1, 'Naik Traders', 'naiktraders@okhdfcbank')`)
     await bulk(t, 'branches', ['id', 'org_id', 'name', 'code'], BRANCHES.map((b) => [b.id, 1, b.name, b.code]))
-    await bulk(t, 'users', ['id', 'org_id', 'branch_id', 'name', 'role', 'title', 'phone', 'lang'], USERS.map((u) => [u[0], 1, ...u.slice(1)]))
+    await bulk(t, 'users', ['id', 'org_id', 'branch_id', 'name', 'role', 'title', 'phone', 'lang', 'pass_hash'], USERS.map((u) => [u[0], 1, ...u.slice(1), hashPassword(demoPassword(u[2]))]))
     await bulk(t, 'items', ['id', 'org_id', 'name', 'aliases', 'category', 'unit', 'hsn', 'gst_rate', 'cost', 'price', 'lead_days'],
       ITEMS.map((s, i) => [i + 1, 1, s[0], s[1], s[2], s[3], s[4], s[5], s[6], s[7], LEAD[s[2]]]))
     await bulk(t, 'customers', ['id', 'org_id', 'branch_id', 'name', 'aliases', 'phone', 'credit_limit', 'notes'],
@@ -296,4 +301,7 @@ export const ready = () =>
     // databases made before expiry dates and WhatsApp approvals existed
     await db.execute('ALTER TABLE purchase_items ADD COLUMN expiry TEXT').catch(() => {})
     await db.execute('CREATE TABLE IF NOT EXISTS pending (user_id INTEGER PRIMARY KEY, org_id INTEGER NOT NULL, action TEXT NOT NULL, ts TEXT NOT NULL)')
+    // databases made before sign-in passwords: give every person their demo password
+    if (await db.execute('ALTER TABLE users ADD COLUMN pass_hash TEXT').then(() => true, () => false))
+      for (const u of await q<{ id: number; name: string }>('SELECT id, name FROM users')) await run('UPDATE users SET pass_hash=? WHERE id=?', [hashPassword(demoPassword(u.name)), u.id])
   })())

@@ -21,6 +21,7 @@
   --amber: #a85a06;
   --amber-soft: #fbebd6;
   --wa: #0b5c4c;
+  --on-bahi: #fff8f2;
   --wa-bubble: #d9fdd3;
   --wa-bg: #ece8e1;
   --shadow: 0 1px 0 rgb(29 29 27 / 0.03), 0 1px 2px rgb(29 29 27 / 0.06);
@@ -47,7 +48,8 @@
     --leaf-soft: #1c2c20;
     --amber: #e59a46;
     --amber-soft: #33261a;
-    --wa: #6ad3b7;
+    --wa: #1f6b58; /* WhatsApp's dark-mode green: white text stays readable on it */
+    --on-bahi: #1c0c0a;
     --wa-bubble: #144d40;
     --wa-bg: #0f1a17;
     --shadow: 0 1px 0 rgb(0 0 0 / 0.3);
@@ -105,7 +107,7 @@ body { font-family: var(--font-sans); }
   .btn:active { transform: translateY(1px); }
   .btn:disabled { opacity: 0.5; cursor: not-allowed; }
   .btn:focus-visible, .input:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
-  .btn-primary { background: var(--bahi); border-color: var(--bahi); color: #fff8f2; }
+  .btn-primary { background: var(--bahi); border-color: var(--bahi); color: var(--on-bahi); }
   .btn-primary:hover { background: var(--bahi-2); border-color: var(--bahi-2); }
   .btn-ghost { border-color: transparent; background: transparent; }
   .btn-ghost:hover { background: var(--paper-2); }

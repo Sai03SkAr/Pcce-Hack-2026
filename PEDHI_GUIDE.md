@@ -66,13 +66,33 @@ Everything on my side is done. These are the only steps left for you, in order. 
    ```bash
    npm run dev
    ```
-5. Open **http://localhost:3000** in Chrome. Pick **Suresh Naik (Owner)**. You should see "Good morning/afternoon, Suresh ji" with the brief.
+5. Open **http://localhost:3000** in Chrome. Tap **Suresh Naik (Owner)** and enter his password (see *Sign-in passwords* below). You should see "Good morning/afternoon, Suresh ji" with the brief.
    - If it says port 3000 is busy (it is on your Mac), use `npm run dev -- -p 3100` and open http://localhost:3100.
 6. Check it worked:
    ```bash
    npm test
    ```
-   It should end with `pass 32` and `fail 0`.
+   It should end with `pass 33` and `fail 0`.
+
+### Sign-in passwords (demo)
+After you tap a person on the first screen, Pedhi asks for that person's password. The demo passwords are each person's first name in small letters plus `123`:
+
+| Person | Role | Password |
+|---|---|---|
+| Suresh Naik | Owner | `suresh123` |
+| Anita Naik | Family | `anita123` |
+| Rohan Naik | Manager, Mapusa | `rohan123` |
+| Raju Gawde | Staff, Ponda | `raju123` |
+| Santosh Parab | Staff, Ponda | `santosh123` |
+| Meena Kerkar | Staff, Margao | `meena123` |
+| Vishal Salgaonkar | Staff, Mapusa | `vishal123` |
+| CA Prakash Kamat | CA | `prakash123` |
+
+- Change any password under **People** (owner and family can change anyone's; others can change only their own).
+- **Reset demo data** puts these passwords back.
+- Five wrong tries lock that person for a minute.
+- Passwords are stored scrambled (hashed), and the sign-in cookie is signed, so nobody can edit it to become someone else.
+- These are demo passwords. Change them before any real business uses Pedhi.
 
 ### Step 2. Add the AI key (5 minutes, recommended)
 Without a key everything works on the rule engine. With it, the brief reads naturally in Hindi, Ask Pedhi answers any question, and voice/WhatsApp understand looser sentences.
@@ -107,19 +127,49 @@ Phones only offer "Install" on an **https** link, so the laptop needs a tunnel:
 ### Step 5 (optional). Test the Tally export on a Windows PC
 Follow `tally-test-pack/HOW-TO-TEST-IN-TALLY.md`. If the Trial Balance matches, you can tell judges "tested in TallyPrime". If Tally shows errors, send me the `tally.imp` file and I'll fix it.
 
-### Step 6 (optional). Real WhatsApp instead of the simulator
-1. https://developers.facebook.com → Create App → Business → add **WhatsApp**.
-2. In WhatsApp → API Setup, note the **test phone number ID** and the **temporary access token**; add your phone under "To" (up to 5 numbers).
-3. In `pedhi/.env.local` add:
-   ```bash
-   WHATSAPP_TOKEN=...
-   WHATSAPP_PHONE_NUMBER_ID=...
-   WHATSAPP_APP_SECRET=...   (Meta → App settings → Basic → App secret)
-   ```
-   `WHATSAPP_VERIFY_TOKEN` is already filled in `.env.local`.
-4. In Meta → WhatsApp → Configuration → Webhook: URL `https://<your-tunnel-link>/api/whatsapp`, verify token = the `WHATSAPP_VERIFY_TOKEN` value from `.env.local`; subscribe to **messages**. Pedhi checks Meta's signature on every message with the app secret, so fake messages are rejected.
-5. Sign in as the owner → **WhatsApp** → **WhatsApp numbers** card: type your phone number next to Raju (or anyone) and press Save. No code change needed.
-6. Send "hi" from your phone to the test number. Note: the temporary token expires in 24 hours.
+### Step 6. Real WhatsApp on +91 93221 06240 (for the judges)
+Pedhi already knows this number: it belongs to **Suresh Naik (owner)** in the demo data, so messages from that phone are read as the owner's. Meta gives a free **test business number**. Your phone (+91 93221 06240) chats with that test number, and Pedhi answers through it.
+
+**A. Create the WhatsApp app on Meta (15 minutes, only you can do this: it needs your Facebook login)**
+1. Go to https://developers.facebook.com → **My Apps** → **Create app**. Choose **Other** → **Business**, give it any name (e.g. "Pedhi Demo"), and create it.
+2. On the app's page, find **WhatsApp** and press **Set up**. Pick or create a business portfolio when it asks.
+3. Open **WhatsApp → API Setup**. You will see a **test number** (it starts with +1 555...) and a **Phone number ID** under it. Copy the Phone number ID.
+4. On the same page press **Generate access token** and copy it. (This token works for 24 hours. For a token that does not expire, see D below.)
+5. Still on API Setup, under **To**, press **Manage phone number list** → add **+91 93221 06240**. Meta sends a code to that phone on WhatsApp. Type the code to verify it.
+6. Go to **App settings → Basic**, press **Show** next to **App secret**, and copy it.
+
+**B. Put the four values into Pedhi (2 minutes)**
+Open `pedhi/.env.local` in any text editor. Fill these lines after the `=` with no spaces or quotes. `WHATSAPP_VERIFY_TOKEN` is already filled in; leave it.
+```bash
+WHATSAPP_TOKEN=the access token from A4
+WHATSAPP_PHONE_NUMBER_ID=the Phone number ID from A3
+WHATSAPP_APP_SECRET=the app secret from A6
+```
+Save, then restart Pedhi. Stop it with Ctrl+C and start it again, or double-click `Start Pedhi.command`, or ask me to restart it. The People screen then says "Real WhatsApp is connected".
+
+**C. Point Meta at Pedhi (3 minutes)**
+1. Pedhi must be reachable on https. Keep the tunnel running (Step 3) and note its link, e.g. `https://something.trycloudflare.com`.
+2. In Meta: **WhatsApp → Configuration → Webhook → Edit**.
+   - Callback URL: `https://something.trycloudflare.com/api/whatsapp`
+   - Verify token: copy the `WHATSAPP_VERIFY_TOKEN` value from `pedhi/.env.local`
+   - Press **Verify and save**. If it fails, Pedhi or the tunnel is not running.
+3. Under **Webhook fields** press **Manage** and **Subscribe** to **messages**.
+
+**D. Try it from your phone**
+1. Save the Meta test number in your phone's contacts as "Pedhi". Open WhatsApp and send **hi**. Pedhi replies with what it can do.
+2. Then try:
+   - `brief` (today's brief)
+   - `Kya expire hone wala hai?`
+   - `Margao: Dhavalikar ko 10 bori ACC cement udhaar`, then reply `haan` to save it. The owner works for every branch, so include the branch name.
+   - `20 bag Dalmia cement aaya Mapusa exp 02/2027` (new item), then `YES 395 355`, then `yes`.
+3. Every saved message shows up at once on the laptop and phones (green "Live" dot).
+
+**Things to know**
+- The quick tunnel link changes whenever the tunnel restarts, and Cloudflare can drop it after some hours. Each time it changes, paste the new link into the Meta webhook (C2). For a link that never changes, deploy (Step 7) or create a named Cloudflare tunnel.
+- WhatsApp rule: Pedhi can only message your phone within 24 hours of your phone's last message. Send "hi" before the demo so the brief and replies can reach you.
+- The access token from A4 expires in 24 hours. For a permanent one: business.facebook.com → **Settings → Users → System users** → add an Admin system user → **Generate token** for your app with the `whatsapp_business_messaging` and `whatsapp_business_management` permissions. Paste it as `WHATSAPP_TOKEN`.
+- To put the number on someone else (e.g. Raju, to show staff billing): sign in as the owner → **People** → move **+91 93221 06240** to that person. Remove it from Suresh first, since one number can belong to one person only.
+- Without these steps, the **WhatsApp** screen in the app is a full simulator of the same flow, and nothing breaks.
 
 ### Step 7 (optional). A permanent public link (Vercel + Turso, free tiers)
 1. The code is already on GitHub: https://github.com/Sai03SkAr/Pcce-Hack-2026. In Vercel set the **Root Directory** to `pedhi`.
@@ -133,7 +183,7 @@ Once deployed on Vercel (Step 7) with real WhatsApp (Step 6): add an environment
 ### Step 8 (before any real business uses it, not for the hackathon)
 - A CA reviews the ledger and GST rules (ask them to check `TALLY_RESEARCH_AND_ACCOUNTING_PLAN.md` section 3).
 - Take a backup every week: **Books → CA pack → Download backup**.
-- Replace the demo persona login with OTP login, set `WHATSAPP_APP_SECRET` (the signature check refuses unsigned messages in production), and set up daily database backups.
+- Change every demo password (People screen), consider OTP login, set `WHATSAPP_APP_SECRET` (the signature check refuses unsigned messages in production), and set up daily database backups.
 
 ---
 

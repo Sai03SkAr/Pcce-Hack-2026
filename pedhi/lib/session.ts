@@ -2,6 +2,7 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { one, q } from './db'
 import { ready } from './seed'
+import { readSession } from './auth'
 import type { Lang } from './format'
 import type { Scope } from './metrics'
 
@@ -10,16 +11,15 @@ export type User = {
   name: string; role: 'owner' | 'family' | 'manager' | 'staff' | 'ca'; title: string; phone: string; lang: Lang
 }
 
-const USER_SQL = `SELECT u.*, o.name org, b.name branch FROM users u JOIN orgs o ON o.id=u.org_id LEFT JOIN branches b ON b.id=u.branch_id`
+const USER_SQL = `SELECT u.id, u.org_id, u.branch_id, u.name, u.role, u.title, u.phone, u.lang, o.name org, b.name branch FROM users u JOIN orgs o ON o.id=u.org_id LEFT JOIN branches b ON b.id=u.branch_id`
 export const userById = (id: number) => one<User>(`${USER_SQL} WHERE u.id=?`, [id])
 export const userByPhone = (phone: string) => one<User>(`${USER_SQL} WHERE u.phone=?`, [phone])
 export const allUsers = () => q<User>(`${USER_SQL} ORDER BY u.id`)
 
-// shortcut: the cookie is an unsigned user id because login is a demo persona picker;
-// swap for OTP login with a signed session before real customers use it.
+/** The signed-in person, from the signed cookie set after their password was checked. */
 export async function getUser(): Promise<User> {
   await ready()
-  const id = Number((await cookies()).get('pedhi_uid')?.value)
+  const id = await readSession((await cookies()).get('pedhi_uid')?.value)
   const u = id ? await userById(id) : undefined
   if (!u) redirect('/login')
   return u

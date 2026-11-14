@@ -11,10 +11,10 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:3000 (or double-click `../Start Pedhi.command` on a Mac, which uses port 3100) and pick a person (the owner, family, a branch manager, counter staff, or the CA). The database (`pedhi.db`) is created and filled with 90 days of history for **Naik Traders** (three branches in Goa) on the first request. No accounts or keys are needed.
+Open http://localhost:3000 (or double-click `../Start Pedhi.command` on a Mac, which uses port 3100) and pick a person (the owner, family, a branch manager, counter staff, or the CA), then enter their password: first name + `123`, e.g. `suresh123` (all listed in `../PEDHI_GUIDE.md`). The database (`pedhi.db`) is created and filled with 90 days of history for **Naik Traders** (three branches in Goa) on the first request. No accounts or keys are needed.
 
 ```bash
-npm test        # 32 tests: planted stories, ledger rules, permissions, parsers, WhatsApp, ask, double-entry books, GST, CA lock, help guide
+npm test        # 33 tests: planted stories, ledger rules, permissions, parsers, WhatsApp, ask, double-entry books, GST, CA lock, help guide
 npm run seed    # reset the demo data (also: "Reset demo data" in the sidebar when signed in as the owner)
 ```
 
@@ -86,7 +86,7 @@ The model never calculates a number.
 
 ### Four-minute walkthrough
 
-1. Sign in as **Suresh (Owner)**. Read the brief; switch to हिं.
+1. Sign in as **Suresh (Owner)** with his password. Read the brief; switch to हिं.
 2. Tap **Transfer from Ponda** on the Mapusa issue.
 3. Open **WhatsApp**, chat as **Raju**: `Dhavalikar ko 10 bori ACC cement udhaar`. Pedhi shows the bill; reply `haan`. Show the bill in **Sales** and the updated udhaar.
    Then chat as **Rohan**: `20 bag Dalmia cement aaya exp 02/2027` → Pedhi asks to add the new item → `YES 395 355` → `yes`. Keep **Stock plan** open in a second window: it updates by itself.

@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS branches (id INTEGER PRIMARY KEY, org_id INTEGER NOT 
 CREATE TABLE IF NOT EXISTS users (
   id INTEGER PRIMARY KEY, org_id INTEGER NOT NULL, branch_id INTEGER,
   name TEXT NOT NULL, role TEXT NOT NULL CHECK (role IN ('owner','family','manager','staff','ca')),
-  title TEXT, phone TEXT, lang TEXT NOT NULL DEFAULT 'en');
+  title TEXT, phone TEXT, lang TEXT NOT NULL DEFAULT 'en', pass_hash TEXT);
 CREATE TABLE IF NOT EXISTS items (
   id INTEGER PRIMARY KEY, org_id INTEGER NOT NULL, name TEXT NOT NULL, aliases TEXT NOT NULL DEFAULT '',
   category TEXT, unit TEXT NOT NULL DEFAULT 'pc', hsn TEXT, gst_rate INTEGER NOT NULL DEFAULT 18,

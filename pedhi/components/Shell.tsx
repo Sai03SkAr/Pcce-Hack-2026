@@ -2,7 +2,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState, useTransition } from 'react'
-import { BookOpenText, Boxes, Calculator, Landmark, Building2, ChevronDown, LifeBuoy, Menu, X, History, LogOut, MessageCircle, ReceiptIndianRupee, RotateCcw, Sparkles, Sun, Upload, Users } from 'lucide-react'
+import { BookOpenText, Boxes, Calculator, Landmark, Building2, ChevronDown, LifeBuoy, Menu, X, History, LogOut, MessageCircle, ReceiptIndianRupee, RotateCcw, Sparkles, Sun, Upload, UserCog, Users } from 'lucide-react'
 import { logout, resetDemo, setBranch, setLang } from '@/app/actions'
 import { Wordmark } from './Logo'
 import { HelpWidget } from './HelpWidget'
@@ -20,6 +20,7 @@ const NAV: Item[] = [
   { href: '/ask', label: 'Ask Pedhi', icon: Sparkles, who: ['owner', 'family', 'manager', 'staff', 'ca'] },
   { href: '/closing', label: 'Day close', icon: Calculator, who: ['owner', 'family', 'manager', 'staff'] },
   { href: '/whatsapp', label: 'WhatsApp', icon: MessageCircle, who: ['owner', 'family', 'manager', 'staff'] },
+  { href: '/team', label: 'People', icon: UserCog, who: ['owner', 'family', 'manager', 'staff', 'ca'] },
   { href: '/import', label: 'Import sheet', icon: Upload, who: ['owner', 'family', 'manager'] },
   { href: '/activity', label: 'Activity', icon: History, who: ['owner', 'family', 'ca'] },
 ]

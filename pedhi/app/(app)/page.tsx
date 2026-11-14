@@ -36,7 +36,7 @@ export default async function Today() {
   const wk = prevWeek.revenue ? Math.round(((week.revenue - prevWeek.revenue) / prevWeek.revenue) * 100) : 0
   const keys = scope.branchId ? [scope.branchName!] : ['Margao', 'Mapusa', 'Ponda']
   const hour = +new Date(Date.now() + 5.5 * 3600e3).toISOString().slice(11, 13)
-  const greet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
+  const greet = hour < 4 ? 'Working late' : hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening' // 2 am isn't morning
   const t = (en: string, hi: string) => (lang === 'hi' ? hi : en)
 
   const kpis = [

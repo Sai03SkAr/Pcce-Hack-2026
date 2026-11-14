@@ -13,6 +13,7 @@ import { seed } from '@/lib/seed'
 import { getScope, getUser, isFamily, userById } from '@/lib/session'
 import { sendText, waEnabled } from '@/lib/whatsapp'
 import * as Books from '@/lib/books'
+import { checkPassword, hashPassword, lockedFor, noteAttempt, signSession } from '@/lib/auth'
 import { parseBookSentence } from '@/lib/bookParse'
 
 export type Result<T = unknown> = { ok: true; data: T; message?: string } | { ok: false; error: string }
@@ -38,11 +39,18 @@ export async function getLang(): Promise<Lang> {
 
 const COOKIE = { httpOnly: true, sameSite: 'lax' as const, path: '/', maxAge: 60 * 60 * 24 * 30 }
 
-export async function login(userId: number) {
-  const u = await userById(userId)
-  if (!u) return
+/** Pick a person, then their password. Five wrong tries lock that person for a minute. */
+export async function login(_: unknown, form: FormData): Promise<{ error: string } | undefined> {
+  const u = await userById(Number(form.get('user')))
+  if (!u) return { error: 'Pick who you are.' }
+  const wait = lockedFor(u.id)
+  if (wait) return { error: `Too many wrong tries. Wait ${wait} seconds.` }
+  const row = await one<{ pass_hash: string | null }>('SELECT pass_hash FROM users WHERE id=?', [u.id])
+  const ok = checkPassword(String(form.get('password') ?? ''), row?.pass_hash)
+  noteAttempt(u.id, ok)
+  if (!ok) return { error: 'Wrong password. Try again.' }
   const c = await cookies()
-  c.set('pedhi_uid', String(u.id), COOKIE)
+  c.set('pedhi_uid', await signSession(u.id), COOKIE)
   c.delete('pedhi_branch')
   c.delete('pedhi_lang')
   await audit(u, u.org_id, 'login', `${u.name} signed in`)
@@ -399,4 +407,18 @@ export async function setUserPhone(userId: number, phone: string) {
     await audit(u, u.org_id, 'phone', `Set WhatsApp number for ${p.name}`)
     return null
   }, 'Number saved.')
+}
+
+/** The family sets anyone's password; everyone else can change only their own. */
+export async function setPassword(userId: number, password: string) {
+  const u = await getUser()
+  return act(async () => {
+    if (userId !== u.id && !isFamily(u)) throw new OpError('Only the family can change someone else’s password.')
+    if (password.length < 6) throw new OpError('Use at least 6 characters.')
+    const p = await userById(userId)
+    if (!p || p.org_id !== u.org_id) throw new OpError('Person not found.')
+    await run('UPDATE users SET pass_hash=? WHERE id=?', [hashPassword(password), userId])
+    await audit(u, u.org_id, 'password', `Changed the password for ${p.name}`)
+    return null
+  }, 'Password changed.')
 }

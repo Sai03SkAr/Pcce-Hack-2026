@@ -1,7 +1,7 @@
 import { connection } from 'next/server'
 import { allUsers } from '@/lib/session'
 import { ready } from '@/lib/seed'
-import { login } from '../actions'
+import { PeoplePicker } from './PeoplePicker'
 import { Wordmark } from '@/components/Logo'
 
 const SEES: Record<string, string> = {
@@ -34,26 +34,9 @@ export default async function Login() {
         <div className="mx-auto w-full max-w-md">
           <div className="lg:hidden mb-8"><Wordmark /></div>
           <h1 className="display text-3xl font-semibold">Who is opening the pedhi?</h1>
-          <p className="mt-2 text-muted">Each person sees a different business. Pick one to try it.</p>
-          <ul className="mt-7 space-y-2.5">
-            {users.map((u, i) => (
-              <li key={u.id} className="rise" style={{ animationDelay: `${i * 45}ms` }}>
-                <form action={login.bind(null, u.id)}>
-                  <button className="card group flex w-full items-center gap-3.5 p-3.5 text-left transition hover:border-line-2 hover:shadow-[var(--shadow-lg)]">
-                    <span className={`grid size-11 shrink-0 place-items-center rounded-full text-[15px] font-semibold ${TONE[u.role]}`}>
-                      {u.name.split(' ').slice(-2).map((p) => p[0]).join('')}
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="flex items-center gap-2"><span className="font-semibold">{u.name}</span><span className="chip chip-grey">{u.role === 'ca' ? 'CA' : u.role[0].toUpperCase() + u.role.slice(1)}</span></span>
-                      <span className="block text-[13px] text-ink-2">{u.title}</span>
-                      <span className="block truncate text-[12.5px] text-muted">{SEES[u.role]}</span>
-                    </span>
-                    <span className="text-muted transition group-hover:translate-x-0.5 group-hover:text-bahi">→</span>
-                  </button>
-                </form>
-              </li>
-            ))}
-          </ul>
+          <p className="mt-2 text-muted">Each person sees a different business. Tap your name and enter your password.</p>
+          <PeoplePicker people={users.map((u) => ({ id: u.id, name: u.name, role: u.role, title: u.title, sees: SEES[u.role], tone: TONE[u.role] }))} />
+          <p className="mt-6 text-[12.5px] text-muted">Each person has their own password. The family can change any password under People.</p>
         </div>
       </section>
     </main>
