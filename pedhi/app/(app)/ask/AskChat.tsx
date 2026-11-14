@@ -69,7 +69,7 @@ export function AskChat({ name, suggestions, ai, lang }: { name: string; suggest
       </div>
       <form onSubmit={(e) => { e.preventDefault(); send(input) }} className="sticky bottom-20 lg:bottom-4">
         <div className="card flex items-center gap-2 p-2 shadow-[var(--shadow-lg)]">
-          <input value={input} onChange={(e) => setInput(e.target.value)} className="h-10 flex-1 bg-transparent px-2 text-[15px] outline-none" placeholder={lang === 'hi' ? 'Is hafte Mapusa ki sale kam kyun hai?' : 'Why are Mapusa sales down this week?'} aria-label="Your question" />
+          <input value={input} onChange={(e) => setInput(e.target.value)} className="h-10 flex-1 bg-transparent px-2 text-[15px] outline-none" placeholder={lang === 'hi' ? 'Is hafte kaunsi branch ki sale sabse kam hai?' : 'Which branch sold the least this week?'} aria-label="Your question" />
           <Mic onText={send} lang={lang === 'hi' ? 'hi-IN' : 'en-IN'} className="size-10 rounded-full p-0" />
           <button className="btn btn-primary size-10 rounded-full p-0" disabled={pending || !input.trim()} aria-label="Ask"><ArrowUp className="size-5" /></button>
         </div>

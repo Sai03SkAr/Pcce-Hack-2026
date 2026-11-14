@@ -571,3 +571,51 @@ test('7 am brief: goes to the owner and family on WhatsApp, once a day', async (
     assert.deepEqual(await sendMorningBriefs(), [], 'a second run the same day sends nothing')
   } finally { process.env = env; globalThis.fetch = realFetch }
 })
+
+test('a new business sets itself up: own branches, owner login, chart of accounts, starter items, and nothing shared with the demo', async () => {
+  const { createBusiness, BUSINESS_TYPES } = await import('../lib/onboard')
+  const { checkPassword } = await import('../lib/auth')
+  const { addSupplier, recordPurchase } = await import('../lib/books')
+  const { trialBalance, profitLoss, balanceSheet, gstSummary } = await import('../lib/reports')
+  const { itemPerformance, reorderList } = await import('../lib/stockplan')
+  const { getBrief } = await import('../lib/brief')
+  const base = { kind: 'pharmacy', name: 'Shree Medicals', owner: 'Asha Kamat', phone: '98230 11111', password: 'asha-secret', state: 'Goa', branches: ['Main shop', 'Market Road'], starter: true }
+
+  await assert.rejects(createBusiness({ ...base, kind: 'spaceship' }), /kind of business/)
+  await assert.rejects(createBusiness({ ...base, password: '123' }), /6 characters/)
+  await assert.rejects(createBusiness({ ...base, phone: '919322106240' }), /already has a Pedhi login/, 'the demo owner’s number is taken')
+
+  const { orgId, userId } = await createBusiness(base)
+  assert.notEqual(orgId, 1)
+  const owner = (await userById(userId))!
+  assert.deepEqual([owner.org_id, owner.role, owner.phone], [orgId, 'owner', '919823011111'])
+  assert.ok(checkPassword('asha-secret', (await one<any>('SELECT pass_hash FROM users WHERE id=?', [userId]))!.pass_hash))
+  const branches = await q<any>('SELECT id, code FROM branches WHERE org_id=? ORDER BY id', [orgId])
+  assert.deepEqual(branches.map((b) => b.code), ['MAI', 'MAR'])
+  const pharmacy = BUSINESS_TYPES.find((t) => t.id === 'pharmacy')!
+  assert.equal((await one<any>('SELECT COUNT(*) n FROM items WHERE org_id=?', [orgId]))!.n, pharmacy.items.length)
+  assert.equal((await one<any>('SELECT COUNT(*) n FROM stock s JOIN items i ON i.id=s.item_id WHERE i.org_id=?', [orgId]))!.n, pharmacy.items.length * 2)
+  assert.ok(await one(`SELECT 1 FROM ledgers WHERE org_id=? AND name='Cash - Market Road'`, [orgId]), 'each branch gets its cash box')
+  await assert.rejects(createBusiness({ ...base, kind: 'kirana' }), /already has a Pedhi login/, 'one mobile, one login')
+
+  // An empty business: every screen’s data loads without errors
+  const s = { orgId }
+  await computeInsights(orgId)
+  await getBrief(owner, s, 'en')
+  await stockStatus(s); await receivables(s); await itemPerformance(s); await reorderList(s)
+  const T = today()
+  await profitLoss(orgId, T, T); await balanceSheet(orgId, T); await gstSummary(orgId, T.slice(0, 7))
+
+  // First stock and first bill, then the books still balance and the demo is untouched
+  const naikBills = (await salesSummary({ orgId: 1 }, T, T)).bills
+  const supId = await addSupplier(owner, { name: 'Goa Pharma Distributors' })
+  const para = (await one<any>('SELECT id FROM items WHERE org_id=? AND name LIKE ?', [orgId, 'Paracetamol%']))!.id
+  await recordPurchase(owner, { branchId: branches[0].id, supplierId: supId as number, mode: 'credit', lines: [{ itemId: para, qty: 100, rate: 12 }] })
+  const sale = await recordSale(owner, { branchId: branches[0].id, customerId: null, mode: 'cash', lines: [{ itemId: para, qty: 3 }], source: 'pos' })
+  assert.equal(sale.total, 54)
+  const tb = await trialBalance(orgId, T)
+  assert.equal(tb.debit, tb.credit)
+  assert.equal((await salesSummary(s, T, T)).bills, 1)
+  assert.equal((await salesSummary({ orgId: 1 }, T, T)).bills, naikBills, 'the demo business is untouched')
+  assert.ok((await stockStatus(s)).every((r) => r.item_id !== 1), 'no demo items leak in')
+})

@@ -245,7 +245,7 @@ export function EntryForm(props: {
             <div className="flex flex-wrap gap-1.5">{[0, 5, 12, 18, 28].map((r) => (
               <button type="button" key={r} onClick={() => setGst(r)} aria-pressed={gst === r} className={`rounded-full border px-3 py-1.5 text-[13px] font-medium ${gst === r ? 'border-ink bg-ink text-paper' : 'border-line-2 bg-card'}`}>{r ? `Yes, ${r}%` : 'No GST bill'}</button>))}</div>
           </Field>
-          <Field label="Note" hint="optional"><input value={note} onChange={(e) => setNote(e.target.value)} className="input" placeholder="November rent, Margao shop" /></Field>
+          <Field label="Note" hint="optional"><input value={note} onChange={(e) => setNote(e.target.value)} className="input" placeholder="November rent, main shop" /></Field>
         </>}
 
         {a === 'move' && <>

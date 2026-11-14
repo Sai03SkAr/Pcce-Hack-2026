@@ -3,6 +3,8 @@ import { waEnabled } from '@/lib/whatsapp'
 import { headers } from 'next/headers'
 import { PeopleAccess } from './PeopleAccess'
 import { WhatsAppSetup } from './WhatsAppSetup'
+import { AddPerson } from './AddPerson'
+import { q } from '@/lib/db'
 
 export default async function Team() {
   const me = await getUser()
@@ -27,6 +29,7 @@ export default async function Team() {
           : 'Change the password you use to open Pedhi.'}</p>
       </div>
       {me.role === 'owner' && <WhatsAppSetup steps={steps} callback={`${base}/api/whatsapp`} verify={process.env.WHATSAPP_VERIFY_TOKEN ?? ''} />}
+      {family && <AddPerson branches={await q<{ id: number; name: string }>('SELECT id, name FROM branches WHERE org_id=? ORDER BY id', [me.org_id])} />}
       <PeopleAccess family={family} meId={me.id} waLive={waEnabled()}
         people={people.map((p) => ({ id: p.id, name: p.name, title: p.title, role: p.role, phone: p.phone ?? '' }))} />
     </div>

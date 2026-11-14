@@ -1,6 +1,6 @@
 export const SCHEMA = `
 CREATE TABLE IF NOT EXISTS orgs (id INTEGER PRIMARY KEY, name TEXT NOT NULL, upi_id TEXT, gstin TEXT, state TEXT NOT NULL DEFAULT 'Goa', books_from TEXT,
-  remind_after_days INTEGER, remind_every_days INTEGER NOT NULL DEFAULT 7);
+  remind_after_days INTEGER, remind_every_days INTEGER NOT NULL DEFAULT 7, kind TEXT);
 CREATE TABLE IF NOT EXISTS branches (id INTEGER PRIMARY KEY, org_id INTEGER NOT NULL, name TEXT NOT NULL, code TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS users (
   id INTEGER PRIMARY KEY, org_id INTEGER NOT NULL, branch_id INTEGER,

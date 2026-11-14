@@ -10,6 +10,15 @@ const SAMPLES: Record<string, string[]> = {
   staff: ['Dhavalikar ko 10 bori ACC cement udhaar', 'haan', '4 led bulb aur 2 kg nails cash', 'Sawant ne 5000 cash diye', 'undo'],
 }
 
+// For a business other than the demo: samples that don't name the demo's customers or items
+const GENERIC: Record<string, string[]> = {
+  owner: ['brief', 'Aaj kitni sale hui?', 'What should I order?', 'Kya expire hone wala hai?'],
+  family: ['brief', 'Who owes us money?', 'Which items have rising demand?'],
+  manager: ['hi', 'What should I order?', 'Aaj kitni sale hui?'],
+  staff: ['hi', 'Aaj kitni sale hui?'],
+  ca: ['hi'],
+}
+
 export default async function WhatsApp({ searchParams }: PageProps<'/whatsapp'>) {
   const me = await getUser()
   const sp = await searchParams
@@ -18,6 +27,6 @@ export default async function WhatsApp({ searchParams }: PageProps<'/whatsapp'>)
   const msgs = await thread(me.org_id, as.id)
   return (
     <Simulator me={{ id: me.id, family: isFamily(me) }} people={people.map((p) => ({ id: p.id, name: p.name, title: p.title, role: p.role, phone: p.phone }))}
-      as={{ id: as.id, name: as.name, title: as.title, role: as.role, lang: as.lang }} msgs={msgs} samples={SAMPLES[as.role]} live={waEnabled()} />
+      as={{ id: as.id, name: as.name, title: as.title, role: as.role, lang: as.lang }} msgs={msgs} samples={me.org_id === 1 ? SAMPLES[as.role] : GENERIC[as.role]} live={waEnabled()} org={me.org} />
   )
 }

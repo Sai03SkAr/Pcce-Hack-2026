@@ -72,7 +72,20 @@ Everything on my side is done. These are the only steps left for you, in order. 
    ```bash
    npm test
    ```
-   It should end with `pass 33` and `fail 0`.
+   It should end with `pass 35` and `fail 0`.
+
+### Any business can set itself up (not just the demo)
+On the first screen, **New here? Set up your business** opens a 4-step wizard:
+1. **What kind of business is this?** Hardware, kirana, pharmacy, clothing, electronics, wholesale, or something else.
+2. **About you:** business name, owner’s name, owner’s mobile and password, state (decides CGST/SGST vs IGST), and optional GSTIN and UPI ID.
+3. **Branches:** one shop or many, each with its own stock, cash box and bill numbers.
+4. **Items:** load a starter list for that kind of business (usual prices and GST rates, all editable; a CA should confirm the rates) or start empty and import an Excel sheet.
+
+Pedhi then creates a separate business with its own books (Tally’s chart of accounts, a cash box per branch). Nothing is shared with Naik Traders or anyone else. The owner lands on a **Set up your pedhi** checklist: add items, enter today’s stock, add family and staff, add customers and old udhaar, add the bank account, make the first bill.
+
+- **People** (owner and family): **Add a person** with a role (staff, manager, family, CA), their branch, mobile and first password.
+- **Sign in:** real businesses sign in with **mobile number and password**. The demo people list on the first screen is only for Naik Traders.
+- **Reset demo data** shows only to the demo owner, asks twice, and says plainly that it also removes businesses set up on the same server. Use a separate server or database for real businesses.
 
 ### Sign-in passwords (demo)
 After you tap a person on the first screen, Pedhi asks for that person's password. The demo passwords are each person's first name in small letters plus `123`:

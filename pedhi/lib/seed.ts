@@ -274,7 +274,7 @@ export async function seed() {
 
   await db.executeMultiple(TABLES.map((t) => `DROP TABLE IF EXISTS ${t};`).join('\n') + SCHEMA)
   await tx(async (t) => {
-    await t.execute(`INSERT INTO orgs (id, name, upi_id) VALUES (1, 'Naik Traders', 'naiktraders@okhdfcbank')`)
+    await t.execute(`INSERT INTO orgs (id, name, upi_id, kind) VALUES (1, 'Naik Traders', 'naiktraders@okhdfcbank', 'hardware')`)
     await bulk(t, 'branches', ['id', 'org_id', 'name', 'code'], BRANCHES.map((b) => [b.id, 1, b.name, b.code]))
     await bulk(t, 'users', ['id', 'org_id', 'branch_id', 'name', 'role', 'title', 'phone', 'lang', 'pass_hash'], USERS.map((u) => [u[0], 1, ...u.slice(1), hashPassword(demoPassword(u[2]))]))
     await bulk(t, 'items', ['id', 'org_id', 'name', 'aliases', 'category', 'unit', 'hsn', 'gst_rate', 'cost', 'price', 'lead_days'],
@@ -300,6 +300,7 @@ export const ready = () =>
     if (!t.length || !(await q('SELECT 1 FROM orgs LIMIT 1')).length) return void await seed()
     // databases made before expiry dates and WhatsApp approvals existed
     await db.execute('ALTER TABLE purchase_items ADD COLUMN expiry TEXT').catch(() => {})
+    await db.execute('ALTER TABLE orgs ADD COLUMN kind TEXT').catch(() => {})
     await db.execute('CREATE TABLE IF NOT EXISTS pending (user_id INTEGER PRIMARY KEY, org_id INTEGER NOT NULL, action TEXT NOT NULL, ts TEXT NOT NULL)')
     // databases made before sign-in passwords: give every person their demo password
     if (await db.execute('ALTER TABLE users ADD COLUMN pass_hash TEXT').then(() => true, () => false))

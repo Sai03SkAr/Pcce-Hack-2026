@@ -32,6 +32,10 @@ export function BillForm({ branches, defaultBranch, items, customers, canEditPri
   const [done, setDone] = useState<{ id: number; total: number } | null>(null)
   const [pending, start] = useTransition()
   const searchRef = useRef<HTMLInputElement>(null)
+  // examples built from this business's own items, so a pharmacy isn't shown cement
+  const ex = items[0]
+  const example = ex ? `Ramesh ko 2 ${ex.unit} ${ex.name.toLowerCase()} udhaar` : 'Add items under Stock first'
+  const searchHint = [...new Set(items.map((i) => i.name.split(' ')[0].toLowerCase()))].slice(0, 4).join(', ') || 'item name'
 
   const stock = useMemo(() => items.filter((i) => i.branch_id === branch), [items, branch])
   const byId = (id: number) => stock.find((i) => i.id === id)!
@@ -61,7 +65,7 @@ export function BillForm({ branches, defaultBranch, items, customers, canEditPri
     setQuick(text)
     start(async () => {
       const p = await quickParse(text)
-      if (!p.lines.length && !p.customerId) return setError('Could not find any items in that. Try "10 bag ACC cement to Ramesh on udhaar".')
+      if (!p.lines.length && !p.customerId) return setError(`Could not find any items in that. Try “${example}”.`)
       setLines(p.lines.filter((l) => byId(l.itemId)).map((l) => ({ itemId: l.itemId, qty: l.qty, price: byId(l.itemId).price })))
       if (p.customerId) { setCustId(p.customerId); setCustQ('') }
       if (p.mode) setMode(p.mode)
@@ -105,7 +109,7 @@ export function BillForm({ branches, defaultBranch, items, customers, canEditPri
         <div className="card p-3">
           <label htmlFor="quick" className="flex items-center gap-1.5 px-1 text-[12.5px] font-semibold text-ink-2"><Wand2 className="size-3.5 text-gold" />Say or type the whole bill</label>
           <form className="mt-2 flex gap-2" onSubmit={(e) => { e.preventDefault(); if (quick.trim()) fill(quick) }}>
-            <input id="quick" value={quick} onChange={(e) => setQuick(e.target.value)} className="input" placeholder="Ramesh ko 10 bori ACC cement aur 2 kg nails udhaar" />
+            <input id="quick" value={quick} onChange={(e) => setQuick(e.target.value)} className="input" placeholder={example} />
             <Mic onText={fill} lang="hi-IN" />
             <button className="btn" disabled={pending || !quick.trim()}>Fill</button>
           </form>
@@ -116,7 +120,7 @@ export function BillForm({ branches, defaultBranch, items, customers, canEditPri
             <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted" />
             <input ref={searchRef} autoFocus value={search} onChange={(e) => setSearch(e.target.value)} aria-label="Search items"
               onKeyDown={(e) => { if (e.key === 'Enter' && results[0]) { e.preventDefault(); add(results[0].id) } }}
-              className="input h-11 pl-9 text-[15px]" placeholder="Search items: cement, tmt, pipe, putty…  (Enter adds the first)" />
+              className="input h-11 pl-9 text-[15px]" placeholder={`Search items: ${searchHint}…  (Enter adds the first)`} />
           </div>
           <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
             {results.map((i) => (

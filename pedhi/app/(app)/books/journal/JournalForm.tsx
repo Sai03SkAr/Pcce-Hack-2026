@@ -11,7 +11,7 @@ const inr = (n: number) => '₹' + n.toLocaleString('en-IN')
 
 // Common entries a shop owner or CA needs, prefilled by ledger name (the first matching ledger is picked).
 const TEMPLATES: { label: string; narration: string; rows: [string, 'dr' | 'cr'][] }[] = [
-  { label: 'Bought equipment or furniture', narration: 'Bought a computer for the Margao counter', rows: [['Computers & Equipment', 'dr'], ['HDFC Bank - Current', 'cr']] },
+  { label: 'Bought equipment or furniture', narration: 'Bought a computer for the shop counter', rows: [['Computers & Equipment', 'dr'], ['HDFC Bank - Current', 'cr']] },
   { label: 'Loan received', narration: 'Business loan received in bank', rows: [['HDFC Bank - Current', 'dr'], ['', 'cr']] },
   { label: 'Loan EMI paid', narration: 'Loan EMI for the month', rows: [['', 'dr'], ['Interest Paid', 'dr'], ['HDFC Bank - Current', 'cr']] },
   { label: 'Depreciation', narration: 'Depreciation for the year', rows: [['Depreciation', 'dr'], ['Computers & Equipment', 'cr']] },
@@ -32,7 +32,7 @@ export function JournalForm({ ledgers: l0, groups, today }: { ledgers: Led[]; gr
   const setRow = (i: number, p: Partial<Row>) => setRows(rows.map((r, j) => (j === i ? { ...r, ...p } : r)))
   const use = (t: (typeof TEMPLATES)[number]) => {
     setNarration(t.narration)
-    setRows(t.rows.map(([name]) => ({ ledgerId: ledgers.find((l) => l.name === name)?.id ?? '', dr: '', cr: '' })))
+    setRows(t.rows.map(([name]) => ({ ledgerId: ledgers.find((l) => l.name === name)?.id ?? (name.includes('Bank') ? ledgers.find((l) => l.grp === 'Bank Accounts')?.id : undefined) ?? '', dr: '', cr: '' }))) // a business without HDFC uses its own first bank
     setErr(''); setDone(null)
   }
 
@@ -53,7 +53,7 @@ export function JournalForm({ ledgers: l0, groups, today }: { ledgers: Led[]; gr
       <div className="card space-y-4 p-5">
         <div className="grid gap-3 sm:grid-cols-[160px_1fr]">
           <label className="text-[13px] font-medium">Date<input type="date" value={day} max={today} onChange={(e) => setDay(e.target.value)} className="input mt-1" /></label>
-          <label className="text-[13px] font-medium">What is this for?<input value={narration} onChange={(e) => setNarration(e.target.value)} className="input mt-1" placeholder="Bought a computer for the Margao counter" /></label>
+          <label className="text-[13px] font-medium">What is this for?<input value={narration} onChange={(e) => setNarration(e.target.value)} className="input mt-1" placeholder="Bought a computer for the shop counter" /></label>
         </div>
         <div className="space-y-2">
           <div className="hidden grid-cols-[1fr_120px_120px_32px] gap-2 text-[11.5px] font-semibold uppercase tracking-wide text-muted sm:grid"><span>Ledger</span><span className="text-right">Debit</span><span className="text-right">Credit</span><span /></div>

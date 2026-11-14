@@ -6,6 +6,8 @@ import { addDays, fmtDayLong, inr, inrShort, today } from '@/lib/format'
 import { listInsights } from '@/lib/insights'
 import { branchComparison, receivables, salesByDay, salesByDayBranch, salesSummary, stockStatus, topItems } from '@/lib/metrics'
 import { getScope, getUser, seesMoney } from '@/lib/session'
+import { one, q } from '@/lib/db'
+import { GettingStarted } from '@/components/GettingStarted'
 import { getLang } from '../actions'
 import { BriefCard } from '@/components/BriefCard'
 import { InsightList } from '@/components/Insights'
@@ -34,7 +36,13 @@ export default async function Today() {
   const outCount = stock.filter((r) => r.status === 'out').length
   const lowCount = stock.filter((r) => r.status === 'low').length
   const wk = prevWeek.revenue ? Math.round(((week.revenue - prevWeek.revenue) / prevWeek.revenue) * 100) : 0
-  const keys = scope.branchId ? [scope.branchName!] : ['Margao', 'Mapusa', 'Ponda']
+  const allBranches = await q<{ name: string }>('SELECT name FROM branches WHERE org_id=? ORDER BY id', [u.org_id])
+  const keys = scope.branchId ? [scope.branchName!] : allBranches.map((b) => b.name)
+  // a business that has just been set up: show what to do first instead of empty charts
+  const counts = (await one<any>(`SELECT (SELECT COUNT(*) FROM sales WHERE org_id=?) sales, (SELECT COUNT(*) FROM items WHERE org_id=?) items,
+    (SELECT COUNT(*) FROM users WHERE org_id=?) people, (SELECT COUNT(*) FROM customers WHERE org_id=?) customers,
+    (SELECT COUNT(*) FROM stock_moves WHERE org_id=?) moves, (SELECT COUNT(*) FROM ledgers WHERE org_id=? AND kind='bank') banks`,
+    [u.org_id, u.org_id, u.org_id, u.org_id, u.org_id, u.org_id]))!
   const hour = +new Date(Date.now() + 5.5 * 3600e3).toISOString().slice(11, 13)
   const greet = hour < 4 ? 'Working late' : hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening' // 2 am isn't morning
   const t = (en: string, hi: string) => (lang === 'hi' ? hi : en)
@@ -56,6 +64,15 @@ export default async function Today() {
         </div>
         <p className="pb-1.5 text-[14px] text-muted">{insights.filter((i) => i.status === 'open' && i.severity !== 'good').length} {t('things need you today', 'cheezein aaj aapka dhyan maangti hain')}</p>
       </section>
+
+      {counts.sales === 0 && <GettingStarted lang={lang} steps={[
+        { done: counts.items > 0, href: '/import', en: 'Add your items', hi: 'Apne items jodo', hintEn: 'Import your Excel stock sheet, or add items under Stock.', hintHi: 'Excel stock sheet import karo, ya Stock mein item jodo.' },
+        { done: counts.moves > 0, href: '/import', en: 'Enter the stock you have today', hintEn: 'Import counts, or record the supplier bill when stock arrives.', hi: 'Aaj ka stock darj karo', hintHi: 'Ginti import karo, ya maal aane par supplier bill darj karo.' },
+        { done: counts.people > 1, href: '/team', en: 'Add family and staff', hintEn: 'Each person gets their own login and WhatsApp number.', hi: 'Family aur staff jodo', hintHi: 'Har kisi ka apna login aur WhatsApp number.' },
+        { done: counts.customers > 0, href: '/customers', en: 'Add customers and old udhaar', hintEn: 'Type them in, or import your khata list.', hi: 'Customer aur purana udhaar jodo', hintHi: 'Likho, ya khata list import karo.' },
+        { done: counts.banks > 0, href: '/books', en: 'Add your bank account', hintEn: 'Books → + Bank account, so UPI and bank payments land in the right place.', hi: 'Bank account jodo', hintHi: 'Books → + Bank account.' },
+        { done: false, href: '/bill', en: 'Make your first bill', hintEn: 'Everything on this screen fills in from your bills.', hi: 'Pehla bill banao', hintHi: 'Is screen ki har cheez bills se bharti hai.' },
+      ]} />}
 
       <section className={`grid grid-cols-2 gap-2.5 ${kpis.length === 5 ? 'lg:grid-cols-5' : 'lg:grid-cols-4'}`}>
         {kpis.map((k, i) => (

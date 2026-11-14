@@ -3,11 +3,12 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState, useTransition } from 'react'
 import { BookOpenText, Boxes, Calculator, Landmark, Building2, ChevronDown, LifeBuoy, Menu, X, History, LogOut, MessageCircle, ReceiptIndianRupee, RotateCcw, Sparkles, Sun, Upload, UserCog, Users } from 'lucide-react'
-import { logout, resetDemo, setBranch, setLang } from '@/app/actions'
+import { logout, setBranch, setLang } from '@/app/actions'
 import { Wordmark } from './Logo'
 import { HelpWidget } from './HelpWidget'
 import { InstallApp } from './InstallApp'
 import { Live } from './Live'
+import { ResetDemo } from './ResetDemo'
 
 type Item = { href: string; label: string; icon: typeof Sun; who: string[] }
 const NAV: Item[] = [
@@ -26,7 +27,7 @@ const NAV: Item[] = [
 ]
 
 export type ShellProps = {
-  user: { name: string; role: string; title: string; branch: string | null; org: string }
+  user: { name: string; role: string; title: string; branch: string | null; org: string; demo: boolean }
   branches: { id: number; name: string }[]; branchId: number | null; lang: 'en' | 'hi'; ai: boolean; children: React.ReactNode
 }
 
@@ -90,11 +91,7 @@ export function Shell({ user, branches, branchId, lang, ai, children }: ShellPro
             </span>
             <form action={logout}><button className="btn btn-ghost btn-sm px-2" title="Switch person" aria-label="Switch person"><LogOut className="size-4" /></button></form>
           </div>
-          {user.role === 'owner' && (
-            <form action={resetDemo} onSubmit={(e) => { if (!confirm('Reset all demo data to the starting story?')) e.preventDefault() }}>
-              <button className="flex w-full items-center gap-2 px-2.5 text-[12px] text-muted hover:text-bahi"><RotateCcw className="size-3.5" />Reset demo data</button>
-            </form>
-          )}
+          {user.role === 'owner' && user.demo && <ResetDemo />}
         </div>
       </aside>
 

@@ -14,6 +14,7 @@ import { getScope, getUser, isFamily, userById } from '@/lib/session'
 import { sendText, waEnabled } from '@/lib/whatsapp'
 import * as Books from '@/lib/books'
 import { checkPassword, hashPassword, lockedFor, noteAttempt, signSession } from '@/lib/auth'
+import { createBusiness, type BusinessIn } from '@/lib/onboard'
 import { parseBookSentence } from '@/lib/bookParse'
 
 export type Result<T = unknown> = { ok: true; data: T; message?: string } | { ok: false; error: string }
@@ -196,9 +197,10 @@ export async function confirmImport(branchId: number, rows: Preview[]) {
   })
 }
 
+// shortcut: the demo reset rebuilds the whole database, so businesses set up on a demo server go too (the button says so).
 export async function resetDemo() {
   const u = await getUser()
-  if (u.role !== 'owner') return
+  if (u.role !== 'owner' || u.org_id !== 1) return
   await seed()
   ;(await cookies()).delete('pedhi_branch')
   redirect('/')
@@ -421,4 +423,65 @@ export async function setPassword(userId: number, password: string) {
     await audit(u, u.org_id, 'password', `Changed the password for ${p.name}`)
     return null
   }, 'Password changed.')
+}
+
+/** A new business: create it, sign the owner in, and open their (empty) Today screen. */
+export async function startBusiness(input: BusinessIn): Promise<{ error: string } | undefined> {
+  let userId: number
+  try {
+    userId = (await createBusiness(input)).userId
+  } catch (e) {
+    if (e instanceof OpError) return { error: e.message }
+    console.error(e)
+    return { error: 'Something went wrong. Please try again.' }
+  }
+  const c = await cookies()
+  c.set('pedhi_uid', await signSession(userId), COOKIE)
+  c.delete('pedhi_branch')
+  c.delete('pedhi_lang')
+  redirect('/')
+}
+
+/** Sign in with mobile number and password: how a real business's people log in. */
+export async function loginPhone(_: unknown, form: FormData): Promise<{ error: string } | undefined> {
+  let phone = String(form.get('phone') ?? '').replace(/\D/g, '')
+  if (phone.length === 10) phone = '91' + phone
+  const row = await one<{ id: number; pass_hash: string | null }>('SELECT id, pass_hash FROM users WHERE phone=?', [phone])
+  if (!row) return { error: 'No Pedhi login with this mobile number. Ask your owner to add you under People.' }
+  const wait = lockedFor(row.id)
+  if (wait) return { error: `Too many wrong tries. Wait ${wait} seconds.` }
+  const ok = checkPassword(String(form.get('password') ?? ''), row.pass_hash)
+  noteAttempt(row.id, ok)
+  if (!ok) return { error: 'Wrong password. Try again.' }
+  const u = (await userById(row.id))!
+  const c = await cookies()
+  c.set('pedhi_uid', await signSession(u.id), COOKIE)
+  c.delete('pedhi_branch')
+  c.delete('pedhi_lang')
+  await audit(u, u.org_id, 'login', `${u.name} signed in with mobile`)
+  redirect(u.role === 'staff' ? '/bill' : u.role === 'ca' ? '/books' : '/')
+}
+
+/** The family adds a person: their role, branch, mobile (for WhatsApp and sign-in) and first password. */
+export async function addPerson(p: { name: string; role: string; branchId: number | null; phone: string; password: string }) {
+  const u = await getUser()
+  return act(async () => {
+    if (!isFamily(u)) throw new OpError('Only the family can add people.')
+    const name = p.name.trim().replace(/\s+/g, ' ')
+    if (name.length < 2 || name.length > 60) throw new OpError('Enter their name.')
+    if (!['family', 'manager', 'staff', 'ca'].includes(p.role)) throw new OpError('Pick their role.')
+    const needsBranch = p.role === 'manager' || p.role === 'staff'
+    if (needsBranch && !(await one('SELECT 1 FROM branches WHERE id=? AND org_id=?', [p.branchId, u.org_id]))) throw new OpError('Pick their branch.')
+    let phone = p.phone.replace(/\D/g, '')
+    if (phone.length === 10) phone = '91' + phone
+    if (phone.length < 11 || phone.length > 15) throw new OpError('Enter their 10-digit mobile number.')
+    if (await one('SELECT 1 FROM users WHERE phone=?', [phone])) throw new OpError('Someone already uses this mobile number.')
+    if (p.password.length < 6) throw new OpError('Give them a first password of at least 6 characters.')
+    const TITLE: Record<string, string> = { family: 'Family', manager: 'Branch manager', staff: 'Counter staff', ca: 'Chartered accountant' }
+    const branch = needsBranch ? (await one<{ name: string }>('SELECT name FROM branches WHERE id=?', [p.branchId]))!.name : null
+    await run('INSERT INTO users (org_id, branch_id, name, role, title, phone, lang, pass_hash) VALUES (?,?,?,?,?,?,?,?)',
+      [u.org_id, needsBranch ? p.branchId : null, name, p.role, branch ? `${TITLE[p.role]} · ${branch}` : TITLE[p.role], phone, 'en', hashPassword(p.password)])
+    await audit(u, u.org_id, 'person', `Added ${name} as ${TITLE[p.role].toLowerCase()}${branch ? ' at ' + branch : ''}`)
+    return null
+  }, 'Added. They can sign in with their mobile number and this password.')
 }

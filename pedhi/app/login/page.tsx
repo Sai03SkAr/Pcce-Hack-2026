@@ -2,6 +2,7 @@ import { connection } from 'next/server'
 import { allUsers } from '@/lib/session'
 import { ready } from '@/lib/seed'
 import { PeoplePicker } from './PeoplePicker'
+import { PhoneLogin } from './PhoneLogin'
 import { Wordmark } from '@/components/Logo'
 
 const SEES: Record<string, string> = {
@@ -16,7 +17,7 @@ const TONE: Record<string, string> = { owner: 'bg-bahi text-[#fff6e6]', family: 
 export default async function Login() {
   await connection() // the people list comes from the database on every request
   await ready()
-  const users = await allUsers()
+  const users = (await allUsers()).filter((u) => u.org_id === 1) // the demo business; real businesses sign in by mobile
   return (
     <main className="min-h-dvh grid lg:grid-cols-[1.05fr_1fr]">
       <section className="relative hidden lg:flex flex-col justify-between overflow-hidden bg-bahi p-12 text-[#fff6e6]">
@@ -33,9 +34,11 @@ export default async function Login() {
       <section className="flex flex-col justify-center px-5 py-10 sm:px-12">
         <div className="mx-auto w-full max-w-md">
           <div className="lg:hidden mb-8"><Wordmark /></div>
-          <h1 className="display text-3xl font-semibold">Who is opening the pedhi?</h1>
-          <p className="mt-2 text-muted">Each person sees a different business. Tap your name and enter your password.</p>
-          <PeoplePicker people={users.map((u) => ({ id: u.id, name: u.name, role: u.role, title: u.title, sees: SEES[u.role], tone: TONE[u.role] }))} />
+          <h1 className="display text-3xl font-semibold">Open your pedhi</h1>
+          <div className="mt-5"><PhoneLogin /></div>
+          <h2 className="mt-9 font-semibold">Or try the demo: Naik Traders</h2>
+          <p className="mt-1 text-[14px] text-muted">Three branches in Goa with 90 days of history. Each person sees a different business: tap a name and enter the password.</p>
+          <div className="-mt-3"><PeoplePicker people={users.map((u) => ({ id: u.id, name: u.name, role: u.role, title: u.title, sees: SEES[u.role], tone: TONE[u.role] }))} /></div>
           <p className="mt-6 text-[12.5px] text-muted">Each person has their own password. The family can change any password under People.</p>
         </div>
       </section>

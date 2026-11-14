@@ -364,12 +364,12 @@ export async function reopen(u: User) {
 
 const GSTIN = /^\d{2}[A-Z]{5}\d{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/
 // The first two digits of a GSTIN are the state code; it decides CGST+SGST versus IGST.
-const STATE_CODES: Record<string, string> = {
+export const STATE_CODES: Record<string, string> = {
   '01': 'Jammu & Kashmir', '03': 'Punjab', '06': 'Haryana', '07': 'Delhi', '08': 'Rajasthan', '09': 'Uttar Pradesh', '10': 'Bihar',
   '18': 'Assam', '19': 'West Bengal', '20': 'Jharkhand', '21': 'Odisha', '22': 'Chhattisgarh', '23': 'Madhya Pradesh', '24': 'Gujarat',
   '27': 'Maharashtra', '29': 'Karnataka', '30': 'Goa', '32': 'Kerala', '33': 'Tamil Nadu', '36': 'Telangana', '37': 'Andhra Pradesh',
 }
-function checkGstin(raw?: string) {
+export function checkGstin(raw?: string) {
   const g = (raw ?? '').trim().toUpperCase()
   if (!g) return { gstin: null, state: null }
   if (!GSTIN.test(g)) throw new OpError('That GSTIN does not look right (15 characters, like 30ABCDE1234F1Z5).')

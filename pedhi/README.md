@@ -14,7 +14,7 @@ npm run dev
 Open http://localhost:3000 (or double-click `../Start Pedhi.command` on a Mac, which uses port 3100) and pick a person (the owner, family, a branch manager, counter staff, or the CA), then enter their password: first name + `123`, e.g. `suresh123` (all listed in `../PEDHI_GUIDE.md`). The database (`pedhi.db`) is created and filled with 90 days of history for **Naik Traders** (three branches in Goa) on the first request. No accounts or keys are needed.
 
 ```bash
-npm test        # 33 tests: planted stories, ledger rules, permissions, parsers, WhatsApp, ask, double-entry books, GST, CA lock, help guide
+npm test        # 35 tests: planted stories, ledger rules, permissions, parsers, WhatsApp, ask, double-entry books, GST, CA lock, help guide
 npm run seed    # reset the demo data (also: "Reset demo data" in the sidebar when signed in as the owner)
 ```
 
@@ -29,6 +29,8 @@ npm run seed    # reset the demo data (also: "Reset demo data" in the sidebar wh
 
 All variables are listed in `.env.example`.
 | `DATABASE_URL`, `DATABASE_AUTH_TOKEN` | Use a hosted libSQL / Turso database instead of the local file (needed to deploy on Vercel). |
+
+New business? **Set up your business** on the first screen: pick the kind of business (hardware, kirana, pharmacy, clothing, electronics, wholesale), add branches and the owner’s login, and start with a matching item list. Each business is fully separate.
 
 ## What is in it
 

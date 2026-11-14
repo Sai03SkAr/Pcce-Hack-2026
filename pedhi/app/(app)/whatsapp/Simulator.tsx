@@ -9,7 +9,7 @@ import { Mic } from '@/components/Mic'
 type M = { id: number; dir: 'in' | 'out'; body: string; ts: string }
 type P = { id: number; name: string; title: string; role: string; phone?: string; lang?: string }
 
-export function Simulator({ me, people, as, msgs, samples, live }: { me: { id: number; family: boolean }; people: P[]; as: P; msgs: M[]; samples: string[]; live: boolean }) {
+export function Simulator({ me, people, as, msgs, samples, live, org }: { me: { id: number; family: boolean }; people: P[]; as: P; msgs: M[]; samples: string[]; live: boolean; org: string }) {
   const [text, setText] = useState('')
   const [pending, start] = useTransition()
   const [shown, addOptimistic] = useOptimistic(msgs, (s, m: M) => [...s, m])
@@ -49,7 +49,7 @@ export function Simulator({ me, people, as, msgs, samples, live }: { me: { id: n
         <div className="overflow-hidden rounded-[18px] border border-line bg-wa-bg shadow-[var(--shadow-lg)] sm:rounded-[34px] sm:border-[7px] sm:border-ink">
           <div className="flex items-center gap-2.5 bg-wa px-4 pb-2.5 pt-4 text-white">
             <span className="grid size-9 place-items-center rounded-full bg-white/15 text-[14px] font-semibold">पे</span>
-            <div className="leading-tight"><div className="text-[15px] font-semibold">Pedhi · Naik Traders</div><div className="text-[11.5px] text-white/75">{pending ? 'typing…' : `chatting as ${as.name}`}</div></div>
+            <div className="leading-tight"><div className="text-[15px] font-semibold">Pedhi · {org}</div><div className="text-[11.5px] text-white/75">{pending ? 'typing…' : `chatting as ${as.name}`}</div></div>
           </div>
           <div className="h-[calc(100dvh-430px)] min-h-[220px] space-y-2 sm:h-[52dvh] sm:min-h-[360px] overflow-y-auto px-3 py-4" style={{ backgroundImage: 'radial-gradient(color-mix(in oklab, var(--line-2) 55%, transparent) 1px, transparent 1px)', backgroundSize: '16px 16px' }}>
             {!shown.length && <p className="mx-auto mt-10 max-w-[260px] rounded-[10px] bg-card/90 p-3 text-center text-[12.5px] text-muted">No messages yet. Tap a sample below, or type like you would on WhatsApp.</p>}
