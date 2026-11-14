@@ -1,58 +1,42 @@
-# Pedhi: 3-minute pitch (target 2:45)
+# Pedhi: 3-minute pitch (target 2:45, slides only)
 
-About 330 spoken words: about 2:20 of talking at a calm pace, plus about 25 seconds of demo clicks, for 2:45 in total. Rehearse with a timer twice.
-
-## Feature selection
-
-| Show live (the 4 heroes) | Why this one |
-|---|---|
-| **Demo story slide** (slide 5, 5 seconds) | Tells judges the data has real problems hidden in it, so the brief feels earned |
-| **Morning brief + one-tap transfer** (Today screen) | Answers the PS directly: a daily AI business report across branches, with an action |
-| **WhatsApp billing with YES approval** (WhatsApp screen, as Raju) | The wow moment, and it shows trust: the AI proposes, a person approves |
-| **Stock plan** (Stock → Stock plan) | Inventory beyond counting: what to order, what expires, what earns |
-| **Tally-ready books** (Books → CA pack) | Proves it is real accounting, not a toy |
-
-| Mention in one line only | Leave out of the 3 minutes (keep for questions) |
-|---|---|
-| Passwords per person, staff never see profit | Bank reco, journal entries, returns, Day close |
-| Live updates on every screen | Import sheet, help guide, Ask Pedhi details |
-| Ad and subscription revenue | Tech stack, test count beyond one line |
-
-**Before you start:** sign in as Suresh and press **Reset demo data**. Open these tabs in order: Today, WhatsApp (chatting as Raju), Stock plan, Books → CA pack. Keep the deck on a second screen. If Wi-Fi fails, everything above runs on the laptop.
+The live demo comes after these 3 minutes. Speak at a steady pace (about 140 words a minute) and move to the next slide on each heading. Rehearse twice with a timer. If you reach a heading late, drop that section’s last sentence.
 
 ## Script
 
-**0:00 to 0:15 · Hook** (slide 1)
-> Every family business in Goa runs on three things: WhatsApp, a paper khata, and the owner’s memory. Naik Traders has three branches. Every evening Suresh-ji asks: how did we do, who owes us, what’s running out? Nobody can answer quickly.
+**0:00 · Slide 1, Pedhi**
+> Good morning. We are [team name], and this is Pedhi: the Marathi and Gujarati word for a family firm. Pedhi is an AI munim for family businesses. One app for sales, stock, udhaar, accounts and GST, across every branch, that talks to the owner on WhatsApp.
 
-**0:15 to 0:35 · Problem** (slide 2)
-> The information exists, but it is scattered. Orders arrive as chats. Udhaar sits in one notebook. Each branch keeps its own Excel. And Tally is filled in by an accountant weeks later. So the owner never sees one current picture of the business.
+**0:18 · Slide 2, The problem**
+> Take Naik Traders: three family-run branches in Goa. Today their business lives in four places. Orders arrive as WhatsApp chats. Udhaar sits in a paper khata. Each branch counts stock in its own Excel sheet. And an accountant types it all into Tally weeks later. So the owner never sees one current picture.
 
-**0:35 to 0:55 · Solution** (slide 3)
-> Pedhi is the AI munim for family businesses. Staff keep working exactly as they do today: billing at the counter, or sending a WhatsApp message. Pedhi turns every sale into stock, udhaar and proper double-entry books, live, across every branch.
+**0:42 · Slide 3, Our answer**
+> Pedhi doesn’t ask anyone to change how they work. Staff bill at the counter, by voice, or with a WhatsApp message. Pedhi checks each entry against stock, credit limits and branch rules, then updates stock, udhaar and double-entry books together, live. And then it acts.
 
-**0:55 to 2:00 · Live demo** (slide 5 for a moment, then switch to the app)
-> *[Slide 5]* Our demo business has 90 days of history with eight problems hidden in it. Pedhi finds them on its own.
->
-> *[Today]* This is Suresh-ji’s morning. At 7 am this brief reaches his WhatsApp: Mapusa sales are down 29 percent, because ACC cement ran out there, while Ponda has 46 days of it. One tap: transfer 337 bags.
->
-> *[WhatsApp, as Raju]* Counter staff bill in Hinglish: “Dhavalikar ko 10 bori ACC cement udhaar.” Pedhi shows the bill back. Nothing is saved until he replies “haan”. *[type haan]* Saved: stock, udhaar and accounts in one step.
->
-> *[Stock plan]* The family also sees what to order before it runs out, what expires this month, and which items actually earn.
->
-> *[Books → CA pack]* And for the CA, it is Tally-ready: GST returns, profit and loss, and an export straight into TallyPrime.
+**1:02 · Slide 4, What it does**
+> The family gets four things every day. A 7 am brief on WhatsApp, with problems ranked by rupees at stake. WhatsApp entries that save only when the sender replies yes. A stock plan: what to order, what is expiring, what actually earns. And books, GST returns and a Tally export, always ready for the CA.
 
-**2:00 to 2:20 · Why Pedhi wins** (slide 6)
-> Udhaar apps don’t do stock or GST. Tally needs an accountant. Pedhi does both, in Hinglish, over WhatsApp. Every number comes from code, not the AI, and nothing is saved without a person’s yes.
+**1:26 · Slide 5, The live demo**
+> Our demo has 90 days of real-looking history with eight problems hidden inside, and Pedhi finds every one by itself. Mapusa sales fell 30 percent because cement ran out while Ponda had plenty, so Pedhi suggests a transfer. It also catches overdue udhaar, dead stock, cash short every Tuesday, below-cost billing and stock about to expire.
 
-**2:20 to 2:38 · Business model** (slide 7)
-> It is free for one shop, ₹499 a month for the full pedhi, ₹299 per extra branch, and an AI add-on. On top of that, clearly labelled offers from cement and paint brands, shown only to the shops that stock them.
+**1:52 · Slide 6, Why Pedhi wins**
+> Udhaar apps don’t do stock or GST. Tally needs a trained accountant. Excel is manual. Pedhi does all of it in Hinglish, by voice and over WhatsApp. And it is built for trust: numbers come from code, not the AI; staff never see profit; every change is logged.
 
-**2:38 to 2:45 · Close** (slide 8)
-> Your business already runs on WhatsApp. Now it answers back. Thank you.
+**2:14 · Slide 7, Business model**
+> We earn through subscriptions: free for one shop, ₹499 a month for the full pedhi, ₹299 per extra branch, and an AI add-on. On top of that, clearly labelled offers from cement and paint brands, shown only to the shops that stock them, plus a one-time setup fee.
 
-## If something goes wrong
+**2:34 · Slide 8, Close**
+> It works today, with 35 automated tests and Tally-ready books. Your business already runs on WhatsApp. Now it answers back. Let us show you.
 
-- **Real WhatsApp or the phone link is down:** use the WhatsApp screen in the app. It is the same code.
-- **Running long at 2:00:** skip the Stock plan line and go straight to the CA pack.
-- **Judge question “Is the AI making up numbers?”:** open Ask Pedhi, ask “Which branch has the lowest margin this week?”, then open “How this was calculated”.
+**2:45 · end, then the live demo**
+
+## After the pitch: live demo order
+
+Before you start, sign in as Suresh and press **Reset demo data**. Open these tabs in order:
+1. **Today:** the morning brief → tap **Transfer 337 bags from Ponda**.
+2. **WhatsApp as Raju:** `Dhavalikar ko 10 bori ACC cement udhaar`, then `haan`.
+3. **Stock → Stock plan:** what to order, what is expiring, Stars.
+4. **Books → CA pack:** GST and the Tally XML.
+5. If asked: **Ask Pedhi** → “Which branch has the lowest margin this week?” → **How this was calculated**.
+
+If real WhatsApp or the phone link is down, use the WhatsApp screen in the app. It runs the same code.
