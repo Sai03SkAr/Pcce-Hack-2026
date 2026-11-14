@@ -6,6 +6,7 @@ About 330 spoken words: about 2:20 of talking at a calm pace, plus about 25 seco
 
 | Show live (the 4 heroes) | Why this one |
 |---|---|
+| **Demo story slide** (slide 5, 5 seconds) | Tells judges the data has real problems hidden in it, so the brief feels earned |
 | **Morning brief + one-tap transfer** (Today screen) | Answers the PS directly: a daily AI business report across branches, with an action |
 | **WhatsApp billing with YES approval** (WhatsApp screen, as Raju) | The wow moment, and it shows trust: the AI proposes, a person approves |
 | **Stock plan** (Stock → Stock plan) | Inventory beyond counting: what to order, what expires, what earns |
@@ -30,7 +31,9 @@ About 330 spoken words: about 2:20 of talking at a calm pace, plus about 25 seco
 **0:35 to 0:55 · Solution** (slide 3)
 > Pedhi is the AI munim for family businesses. Staff keep working exactly as they do today: billing at the counter, or sending a WhatsApp message. Pedhi turns every sale into stock, udhaar and proper double-entry books, live, across every branch.
 
-**0:55 to 2:00 · Live demo** (switch to the app)
+**0:55 to 2:00 · Live demo** (slide 5 for a moment, then switch to the app)
+> *[Slide 5]* Our demo business has 90 days of history with eight problems hidden in it. Pedhi finds them on its own.
+>
 > *[Today]* This is Suresh-ji’s morning. At 7 am this brief reaches his WhatsApp: Mapusa sales are down 29 percent, because ACC cement ran out there, while Ponda has 46 days of it. One tap: transfer 337 bags.
 >
 > *[WhatsApp, as Raju]* Counter staff bill in Hinglish: “Dhavalikar ko 10 bori ACC cement udhaar.” Pedhi shows the bill back. Nothing is saved until he replies “haan”. *[type haan]* Saved: stock, udhaar and accounts in one step.
@@ -39,13 +42,13 @@ About 330 spoken words: about 2:20 of talking at a calm pace, plus about 25 seco
 >
 > *[Books → CA pack]* And for the CA, it is Tally-ready: GST returns, profit and loss, and an export straight into TallyPrime.
 
-**2:00 to 2:20 · Why Pedhi wins** (slide 5)
-> Udhaar apps don’t do stock or GST. Tally needs an accountant. Pedhi does both, in Hinglish, over WhatsApp. And it is built for trust: every number comes from code, not the AI; staff never see profit; and nothing is saved without a person’s yes.
+**2:00 to 2:20 · Why Pedhi wins** (slide 6)
+> Udhaar apps don’t do stock or GST. Tally needs an accountant. Pedhi does both, in Hinglish, over WhatsApp. Every number comes from code, not the AI, and nothing is saved without a person’s yes.
 
-**2:20 to 2:38 · Business model** (slide 6)
+**2:20 to 2:38 · Business model** (slide 7)
 > It is free for one shop, ₹499 a month for the full pedhi, ₹299 per extra branch, and an AI add-on. On top of that, clearly labelled offers from cement and paint brands, shown only to the shops that stock them.
 
-**2:38 to 2:45 · Close** (slide 7)
+**2:38 to 2:45 · Close** (slide 8)
 > Your business already runs on WhatsApp. Now it answers back. Thank you.
 
 ## If something goes wrong
