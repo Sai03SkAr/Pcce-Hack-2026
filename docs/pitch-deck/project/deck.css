@@ -1,0 +1,44 @@
+/* Pedhi deck: a bahi-khata look. Ink on paper, ledger red, gold binding thread. */
+section {
+  --ink: #1C1A17; --ink-2: #4A453D; --paper: #F6F3EC; --paper-2: #EDE6D8; --card: #FFFDF8; --line: #DDD4C2;
+  --red: #B02A20; --gold: #8F6410; --gold-light: #E7C27A; --cream: #FBF3E6; --wa: #0B5C4C; --wa-bubble: #D9F5CF; --wa-bg: #E6E0D5;
+  background: #F6F3EC; color: #1C1A17; font-family: 'DM Sans', Arial, sans-serif;
+  padding: 128px; box-sizing: border-box; display: flex; flex-direction: column; gap: 48px;
+}
+section.alt { background: #EDE6D8; }
+section.dark { background: #1C1A17; color: #FBF3E6; }
+section.red { background: #B02A20; color: #FBF3E6; }
+
+.eyebrow { font-size: 24px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: #B02A20; }
+.dark .eyebrow, .red .eyebrow { color: #E7C27A; }
+.title { font-family: 'EB Garamond', Georgia, serif; font-size: 72px; font-weight: 600; line-height: 1.05; color: #1C1A17; }
+.dark .title, .red .title { color: #FBF3E6; }
+.head { display: flex; flex-direction: column; gap: 16px; }
+.lead { font-size: 32px; line-height: 1.45; color: #4A453D; }
+.dark .lead { color: #D8D0C1; }
+.red .lead { color: #F6DCD6; }
+.small { font-size: 24px; line-height: 1.4; color: #4A453D; }
+.dark .small { color: #BDB5A6; }
+.red .small { color: #F6DCD6; }
+
+/* cards */
+.cards { display: flex; gap: 32px; flex: 1; }
+.card { flex: 1; background: #FFFDF8; border: 2px solid #DDD4C2; border-radius: 24px; padding: 48px; display: flex; flex-direction: column; gap: 20px; }
+.card h3 { font-size: 40px; font-weight: 700; line-height: 1.15; color: #1C1A17; }
+.card .small { font-size: 30px; line-height: 1.4; color: #4A453D; }
+.card .tag { font-size: 28px; font-weight: 700; color: #B02A20; }
+.fill { flex: 1; }
+.card .big { font-family: 'EB Garamond', Georgia, serif; font-size: 72px; font-weight: 600; line-height: 1; color: #B02A20; }
+
+/* chat mock-ups */
+.chat { background: #E6E0D5; border-radius: 24px; overflow: hidden; display: flex; flex-direction: column; }
+.chat .bar { background: #0B5C4C; padding: 20px 28px; display: flex; flex-direction: column; gap: 2px; }
+.chat .bar .who { font-size: 32px; font-weight: 700; color: #FBF3E6; }
+.chat .bar .sub { font-size: 26px; color: #CFE6DF; }
+.chat .body { padding: 28px; display: flex; flex-direction: column; gap: 18px; }
+.chat .in { align-self: flex-end; max-width: 82%; background: #D9F5CF; border-radius: 18px; padding: 14px 22px; font-size: 30px; line-height: 1.35; color: #1C1A17; }
+.chat .out { align-self: flex-start; max-width: 90%; background: #FFFDF8; border-radius: 18px; padding: 16px 24px; font-size: 30px; line-height: 1.35; color: #1C1A17; }
+
+/* arrival motion: the plain rule is the finished look */
+.rise { animation: rise 600ms cubic-bezier(.2,.7,.2,1) both; animation-delay: calc(var(--i, 0) * 120ms); }
+@keyframes rise { from { opacity: 0; transform: translateY(24px); } }
