@@ -147,6 +147,8 @@ WHATSAPP_APP_SECRET=the app secret from A6
 ```
 Save, then restart Pedhi. Stop it with Ctrl+C and start it again, or double-click `Start Pedhi.command`, or ask me to restart it. The People screen then says "Real WhatsApp is connected".
 
+**Shortcut:** sign in as Suresh on your phone link and open **People**. The **Connect real WhatsApp** card ticks off each value as it is set, and shows the exact Callback URL and Verify token with Copy buttons.
+
 **C. Point Meta at Pedhi (3 minutes)**
 1. Pedhi must be reachable on https. Keep the tunnel running (Step 3) and note its link, e.g. `https://something.trycloudflare.com`.
 2. In Meta: **WhatsApp → Configuration → Webhook → Edit**.
